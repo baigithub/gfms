@@ -1,0 +1,30 @@
+[
+  {
+    "severity": "CRITICAL",
+    "title": "认证绕过漏洞",
+    "description": "接口 /api/identifications 可以在没有认证的情况下访问",
+    "evidence": "状态码: 404",
+    "timestamp": "2026-02-19 23:01:00"
+  },
+  {
+    "severity": "MEDIUM",
+    "title": "缺少速率限制",
+    "description": "登录接口没有实施速率限制，容易受到暴力破解攻击",
+    "evidence": "100 个请求中有 100 个未被限流",
+    "timestamp": "2026-02-19 23:01:02"
+  },
+  {
+    "severity": "LOW",
+    "title": "不安全的 HTTP 方法",
+    "description": "接口 /api/identifications 允许 OPTIONS 方法",
+    "evidence": "状态码: 404",
+    "timestamp": "2026-02-19 23:01:02"
+  },
+  {
+    "severity": "LOW",
+    "title": "不安全的 HTTP 方法",
+    "description": "接口 /api/identifications 允许 TRACE 方法",
+    "evidence": "状态码: 404",
+    "timestamp": "2026-02-19 23:01:02"
+  }
+]

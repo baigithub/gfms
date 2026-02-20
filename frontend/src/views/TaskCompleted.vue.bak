@@ -1,0 +1,1046 @@
+<template>
+  <div class="task-page">
+    <el-card shadow="hover">
+      <template #header>
+        <div class="card-header">
+          <span class="card-title">已办任务</span>
+        </div>
+      </template>
+      
+      <el-table
+        :data="tableData"
+        v-loading="loading"
+        stripe
+        style="width: 100%"
+      >
+        <el-table-column type="index" label="序号" width="60" />
+        <el-table-column prop="customer_name" label="客户名称" min-width="150" />
+        <el-table-column prop="business_type" label="业务品种" width="150" />
+        <el-table-column prop="loan_account" label="贷款账号" width="150" />
+        <el-table-column prop="loan_amount" label="放款金额(元)" width="120">
+          <template #default="{ row }">
+            {{ formatAmount(row.loan_amount) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="disbursement_date" label="放款日" width="120">
+          <template #default="{ row }">
+            {{ formatDate(row.disbursement_date) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="绿色金融支持项目目录" min-width="250">
+          <template #default="{ row }">
+            {{ formatGreenProjectCategory(row) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)" size="small">
+              {{ row.status }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="handleView(row)">
+              查看
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      
+      <el-pagination
+        v-model:current-page="pagination.page"
+        v-model:page-size="pagination.page_size"
+        :total="pagination.total"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="loadData"
+        @current-change="loadData"
+        style="margin-top: 20px; justify-content: flex-end"
+      />
+    </el-card>
+    
+    <!-- 任务详情对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      title="任务详情"
+      width="900px"
+    >
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="业务信息" name="business">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="贷款编号">{{ currentTask.loan_code }}</el-descriptions-item>
+            <el-descriptions-item label="客户名称">{{ currentTask.customer_name }}</el-descriptions-item>
+            <el-descriptions-item label="业务品种">{{ currentTask.business_type }}</el-descriptions-item>
+            <el-descriptions-item label="贷款账号">{{ currentTask.loan_account }}</el-descriptions-item>
+            <el-descriptions-item label="放款金额">{{ formatAmount(currentTask.loan_amount) }}</el-descriptions-item>
+            <el-descriptions-item label="放款日期">{{ formatDate(currentTask.disbursement_date) }}</el-descriptions-item>
+            <el-descriptions-item label="绿色金融支持项目目录" :span="2">{{ formatGreenProjectCategory(currentTask) }}</el-descriptions-item>
+            <el-descriptions-item label="ESG风险等级">{{ currentTask.esg_risk_level }}</el-descriptions-item>
+            <el-descriptions-item label="ESG表现等级">{{ currentTask.esg_performance_level }}</el-descriptions-item>
+          </el-descriptions>
+        </el-tab-pane>
+        
+        <el-tab-pane label="审批记录" name="approval">
+          <el-timeline>
+            <el-timeline-item
+              v-for="item in workflowHistory"
+              :key="item.id"
+              :timestamp="formatDateTime(item.completed_at || item.started_at)"
+              placement="top"
+            >
+              <el-card>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-title">{{ item.task_name }}</span>
+                    <el-tag :type="getStatusType(item.status)" size="small">
+                      {{ item.status }}
+                    </el-tag>
+                  </div>
+                  <div class="timeline-detail">
+                    <span>审批人: {{ item.assignee_name }}</span>
+                    <span>岗位: {{ item.position_name }}</span>
+                  </div>
+                  <div v-if="item.approval_result" class="timeline-result">
+                    <span>审批结果: </span>
+                    <span :class="item.approval_result === '同意' ? 'result-agree' : 'result-disagree'">
+                      {{ item.approval_result }}
+                    </span>
+                  </div>
+                  <div v-if="item.comment" class="timeline-comment">
+                    <span>意见: {{ item.comment }}</span>
+                  </div>
+                  <div v-if="item.reason" class="timeline-reason">
+                    <span>原因: {{ item.reason }}</span>
+                  </div>
+                </div>
+              </el-card>
+            </el-timeline-item>
+          </el-timeline>
+        </el-tab-pane>
+        
+        <el-tab-pane label="流程跟踪" name="flow">
+          <div class="flow-chart-container" v-if="flowSteps.length > 0">
+            <div ref="flowGraphContainer" class="flow-graph-container"></div>
+          </div>
+          <div v-else class="flow-empty">
+            <el-empty description="暂无流程跟踪数据" />
+          </div>
+        </el-tab-pane>
+        
+        <el-tab-pane label="附件列表" name="attachments">
+          <el-table :data="currentTask.attachments || []" stripe size="small" v-if="currentTask.attachments && currentTask.attachments.length > 0">
+            <el-table-column prop="task_name" label="所属节点" width="150" />
+            <el-table-column prop="uploader_name" label="上传人" width="120" />
+            <el-table-column prop="original_filename" label="附件名称" min-width="200">
+              <template #default="{ row }">
+                <el-button type="primary" link size="small" @click="handleDownloadAttachment(row)">
+                  {{ row.original_filename }}
+                </el-button>
+              </template>
+            </el-table-column>
+            <el-table-column prop="file_size" label="文件大小" width="100">
+              <template #default="{ row }">
+                {{ formatFileSize(row.file_size) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="created_at" label="上传时间" width="160" />
+          </el-table>
+          <el-empty v-else description="暂无附件" :image-size="60" />
+        </el-tab-pane>
+        
+        <el-tab-pane label="绿色分类变动轨迹" name="category-trace">
+          <div class="category-trace">
+            <el-timeline>
+              <el-timeline-item
+                v-for="(item, index) in workflowHistory"
+                :key="item.id"
+                :timestamp="formatDateTime(item.completed_at || item.started_at)"
+                placement="top"
+                :type="getTimelineType(item.status)"
+              >
+                <el-card shadow="hover" class="trace-card">
+                  <div class="trace-header">
+                    <span class="trace-title">{{ item.task_name }}</span>
+                    <el-tag size="small">{{ item.status }}</el-tag>
+                  </div>
+                  <div class="trace-detail">
+                    <span>办理人: {{ item.assignee_name }}</span>
+                    <span v-if="item.assignee_username">账号: {{ item.assignee_username }}</span>
+                  </div>
+                  <div v-if="item.formatted_category" class="trace-category">
+                    <div class="category-label">绿色金融支持项目目录:</div>
+                    <div class="category-value">{{ item.formatted_category }}</div>
+                  </div>
+                  <div v-else class="trace-category-empty">
+                    <span>暂无分类信息</span>
+                  </div>
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
+            <el-empty v-if="!workflowHistory || workflowHistory.length === 0" description="暂无分类变动轨迹" />
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+      
+      <template #footer>
+        <el-button @click="dialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted, computed, watch, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
+import { SuccessFilled, Loading, Clock } from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router'
+import { getCompletedTasks, getTaskDetail, getWorkflowHistory } from '@/api/green_finance'
+import dayjs from 'dayjs'
+// import { Graph } from '@antv/x6'
+
+const router = useRouter()
+const route = useRoute()
+
+const loading = ref(false)
+const tableData = ref([])
+const pagination = reactive({
+  page: 1,
+  page_size: 10,
+  total: 0
+})
+
+const dialogVisible = ref(false)
+const activeTab = ref('business')
+const currentTask = ref({})
+const workflowHistory = ref([])
+
+// X6 图表相关
+const flowGraphContainer = ref(null)
+// let flowGraph = null
+
+const currentStep = computed(() => {
+  if (!workflowHistory.value || workflowHistory.value.length === 0) return 0
+  
+  // 获取所有已完成的任务
+  const completedTasks = workflowHistory.value.filter(t => t.status === '已完成')
+  
+  if (completedTasks.length === 0) return 0
+  
+  // 检查是否所有任务都已完成（包括结束条件）
+  const allCompleted = workflowHistory.value.every(t => t && t.status === '已完成')
+  
+  if (allCompleted) {
+    return 5  // 所有任务都已完成，显示到结束节点（索引5）
+  }
+  
+  // 获取最后一个完成的任务
+  const lastTask = completedTasks[completedTasks.length - 1]
+  
+  // 根据最后完成的任务返回步骤索引
+  // 开始节点是0，所以每个任务节点的索引 = task_key对应的顺序
+  const stepMap = {
+    'manager_identification': 1,
+    'branch_review': 2,
+    'first_approval': 3,
+    'final_review': 4
+  }
+  
+  return stepMap[lastTask.task_key] || 1
+})
+
+// 动态生成流程步骤
+const flowSteps = ref([])
+
+// 按照S形布局组织节点：第一行从左到右，第二行从右到左
+const flowRows = computed(() => {
+  if (flowSteps.value.length === 0) return []
+  
+  const rows = []
+  const rowSize = 4 // 每行4个节点
+  
+  for (let i = 0; i < flowSteps.value.length; i += rowSize) {
+    const row = flowSteps.value.slice(i, i + rowSize)
+    // 第二行从右到左排列
+    if (rows.length === 1) {
+      row.reverse()
+    }
+    rows.push(row)
+  }
+  
+  return rows
+})
+
+// 获取节点的实际索引位置（考虑反转）
+const getNodeIndex = (rowIndex, nodeIndex, rowLength) => {
+  // 第二行从右到左，需要反转索引
+  if (rowIndex === 1) {
+    return rowLength - 1 - nodeIndex
+  }
+  return nodeIndex
+}
+
+// 获取连线颜色：根据两个节点的完成状态
+const getLineColor = (fromStep, toStep) => {
+  // 如果两个节点都已完成，使用浅绿色
+  if (fromStep.status === 'finish' && toStep.status === 'finish') {
+    return '#67C23A' // 浅绿色
+  }
+  // 否则使用黑色
+  return '#333333' // 黑色
+}
+
+// 初始化 X6 图表
+const initFlowGraph = () => {
+  if (!flowGraphContainer.value) return
+  
+  // 销毁旧图表
+  if (flowGraph) {
+    flowGraph.dispose()
+  }
+  
+  // 创建新图表
+  flowGraph = new Graph({
+    container: flowGraphContainer.value,
+    width: '100%',
+    height: 400,
+    background: {
+      color: '#f5f5f5'
+    },
+    grid: {
+      size: 10,
+      visible: true,
+      type: 'dot',
+      args: {
+        color: '#d0d0d0',
+        thickness: 1,
+      }
+    },
+    panning: {
+      enabled: true,
+      eventTypes: ['leftMouseDown', 'mouseWheel']
+    },
+    mousewheel: {
+      enabled: true,
+      modifiers: 'ctrl',
+      factor: 1.1,
+      maxScale: 1.5,
+      minScale: 0.5
+    }
+  })
+}
+
+// 渲染流程图
+const renderFlowGraph = () => {
+  if (!flowGraph || flowSteps.value.length === 0) return
+  
+  flowGraph.clearCells()
+  
+  const rowSize = 4
+  const nodeWidth = 140
+  const nodeHeight = 80
+  const nodeSpacing = 180
+  const rowSpacing = 150
+  
+  // 创建节点
+  const nodes = []
+  flowSteps.value.forEach((step, index) => {
+    const rowIndex = Math.floor(index / rowSize)
+    const colIndex = index % rowSize
+    
+    // 第二行从右到左排列
+    let x
+    if (rowIndex === 1) {
+      x = (rowSize - 1 - colIndex) * nodeSpacing + 50
+    } else {
+      x = colIndex * nodeSpacing + 50
+    }
+    
+    const y = rowIndex * rowSpacing + 50
+    
+    // 节点样式
+    const isFinished = step.status === 'finish'
+    const nodeColor = isFinished ? '#67C23A' : '#909399'
+    const nodeText = isFinished ? '✓' : (index + 1).toString()
+    
+    const node = flowGraph.addNode({
+      id: `node-${index}`,
+      x,
+      y,
+      width: nodeWidth,
+      height: nodeHeight,
+      shape: 'rect',
+      attrs: {
+        body: {
+          fill: '#ffffff',
+          stroke: nodeColor,
+          strokeWidth: 2,
+          rx: 8,
+          ry: 8
+        },
+        label: {
+          text: `${step.title}\n${step.description}`,
+          fill: '#333333',
+          fontSize: 12,
+          textWrap: {
+            width: nodeWidth - 20,
+            height: nodeHeight - 20
+          },
+          textAnchor: 'middle',
+          textVerticalAnchor: 'middle'
+        }
+      },
+      ports: {
+        groups: {
+          top: {
+            position: 'top',
+            attrs: {
+              circle: {
+                r: 4,
+                magnet: true,
+                stroke: nodeColor,
+                strokeWidth: 1,
+                fill: '#fff'
+              }
+            }
+          },
+          right: {
+            position: 'right',
+            attrs: {
+              circle: {
+                r: 4,
+                magnet: true,
+                stroke: nodeColor,
+                strokeWidth: 1,
+                fill: '#fff'
+              }
+            }
+          },
+          bottom: {
+            position: 'bottom',
+            attrs: {
+              circle: {
+                r: 4,
+                magnet: true,
+                stroke: nodeColor,
+                strokeWidth: 1,
+                fill: '#fff'
+              }
+            }
+          },
+          left: {
+            position: 'left',
+            attrs: {
+              circle: {
+                r: 4,
+                magnet: true,
+                stroke: nodeColor,
+                strokeWidth: 1,
+                fill: '#fff'
+              }
+            }
+          }
+        },
+        items: [
+          { group: 'top' },
+          { group: 'right' },
+          { group: 'bottom' },
+          { group: 'left' }
+        ]
+      }
+    })
+    
+    // 添加圆形图标
+    flowGraph.addNode({
+      id: `icon-${index}`,
+      x: x + nodeWidth / 2 - 20,
+      y: y - 20,
+      width: 40,
+      height: 40,
+      shape: 'circle',
+      attrs: {
+        body: {
+          fill: nodeColor
+        },
+        label: {
+          text: nodeText,
+          fill: '#ffffff',
+          fontSize: 18,
+          fontWeight: 'bold'
+        }
+      }
+    })
+    
+    nodes.push(node)
+  })
+  
+  // 创建连线
+  for (let i = 0; i < flowSteps.value.length - 1; i++) {
+    const currentRowIndex = Math.floor(i / rowSize)
+    const nextRowIndex = Math.floor((i + 1) / rowSize)
+    
+    const sourceNode = nodes[i]
+    const targetNode = nodes[i + 1]
+    
+    const isLineFinished = flowSteps.value[i].status === 'finish' && flowSteps.value[i + 1].status === 'finish'
+    const lineColor = isLineFinished ? '#67C23A' : '#333333'
+    
+    if (currentRowIndex === nextRowIndex) {
+      // 同一行，使用直线连接
+      flowGraph.addEdge({
+        source: sourceNode,
+        target: targetNode,
+        attrs: {
+          line: {
+            stroke: lineColor,
+            strokeWidth: 2,
+            targetMarker: {
+              name: 'classic',
+              size: 8
+            }
+          }
+        }
+      })
+    } else {
+      // 不同行，使用U形曲线连接
+      const currentColIndex = i % rowSize
+      const nextColIndex = (i + 1) % rowSize
+      
+      // 第二行从右到左，所以计算实际位置
+      const isCurrentRowReversed = currentRowIndex === 1
+      const isNextRowReversed = nextRowIndex === 1
+      
+      const actualCurrentCol = isCurrentRowReversed ? (rowSize - 1 - currentColIndex) : currentColIndex
+      const actualNextCol = isNextRowReversed ? (rowSize - 1 - nextColIndex) : nextColIndex
+      
+      // 如果都是最右侧的节点，使用U形连接
+      if (actualCurrentCol === rowSize - 1 && actualNextCol === rowSize - 1) {
+        const sourceX = sourceNode.position().x + nodeWidth
+        const sourceY = sourceNode.position().y + nodeHeight / 2
+        const targetX = targetNode.position().x + nodeWidth
+        const targetY = targetNode.position().y + nodeHeight / 2
+        
+        const width = 30
+        const height = (targetY - sourceY) / 2
+        
+        flowGraph.addEdge({
+          source: sourceNode,
+          target: targetNode,
+          connector: {
+            name: 'smooth',
+            args: {
+              direction: 'V'
+            }
+          },
+          router: {
+            name: 'manhattan',
+            args: {
+              padding: 30
+            }
+          },
+          attrs: {
+            line: {
+              stroke: lineColor,
+              strokeWidth: 2,
+              targetMarker: {
+                name: 'classic',
+                size: 8
+              }
+            }
+          },
+          vertices: [
+            { x: sourceX + width, y: sourceY },
+            { x: sourceX + width, y: targetY }
+          ]
+        })
+      } else {
+        // 否则使用普通曲线连接
+        flowGraph.addEdge({
+          source: sourceNode,
+          target: targetNode,
+          connector: {
+            name: 'smooth',
+            args: {
+              direction: 'V'
+            }
+          },
+          router: {
+            name: 'manhattan',
+            args: {
+              padding: 20
+            }
+          },
+          attrs: {
+            line: {
+              stroke: lineColor,
+              strokeWidth: 2,
+              targetMarker: {
+                name: 'classic',
+                size: 8
+              }
+            }
+          }
+        })
+      }
+    }
+  }
+  
+  // 居中显示
+  flowGraph.centerContent()
+}
+
+// 监听 flowSteps 变化，重新渲染流程图
+watch(flowSteps, () => {
+  nextTick(() => {
+    initFlowGraph()
+    renderFlowGraph()
+  })
+})
+
+// 监听 dialogVisible 和 activeTab
+watch([dialogVisible, activeTab], ([visible, tab]) => {
+  if (visible && tab === 'flow') {
+    nextTick(() => {
+      initFlowGraph()
+      renderFlowGraph()
+    })
+  })
+})
+
+const formatAmount = (value) => {
+  if (!value) return '0.00'
+  return Number(value).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+const formatDate = (value) => {
+  return value ? dayjs(value).format('YYYY-MM-DD') : '-'
+}
+
+const formatDateTime = (value) => {
+  return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-'
+}
+
+const formatGreenProjectCategory = (row) => {
+  if (row.formatted_category) {
+    return row.formatted_category
+  }
+  // 兼容旧数据
+  const parts = []
+  if (row.project_category_large) {
+    parts.push(row.project_category_large)
+  }
+  if (row.project_category_medium) {
+    parts.push(row.project_category_medium)
+  }
+  if (row.project_category_small) {
+    parts.push(row.project_category_small)
+  }
+  return parts.join('/') || '-'
+}
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
+}
+
+const handleDownloadAttachment = (attachment) => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  const url = `${baseUrl}${attachment.download_url}`
+  window.open(url, '_blank')
+}
+
+const getTimelineType = (status) => {
+  if (status === '已完成') return 'success'
+  if (status === '待处理') return 'primary'
+  if (status === '已撤回') return 'info'
+  return 'warning'
+}
+
+const getStatusType = (status) => {
+  const typeMap = {
+    '待办': 'warning',
+    '已办': 'primary',
+    '办结': 'success',
+    '驳回': 'danger',
+    '撤回': 'info'
+  }
+  return typeMap[status] || 'info'
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const res = await getCompletedTasks({
+      page: pagination.page,
+      page_size: pagination.page_size
+    })
+    tableData.value = res.items
+    pagination.total = res.total
+  } catch (error) {
+    console.error('Failed to load tasks:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleView = async (row) => {
+  try {
+    console.log('handleView called with row:', row)
+    const [detail, history] = await Promise.all([
+      getTaskDetail(row.task_id),
+      getWorkflowHistory(row.id)  // 使用id（identification_id）而不是task_id
+    ])
+    console.log('detail:', detail)
+    console.log('history:', history)
+    currentTask.value = detail
+    workflowHistory.value = history
+    dialogVisible.value = true
+    activeTab.value = 'business'
+  } catch (error) {
+    console.error('获取任务详情失败:', error)
+    ElMessage.error('获取任务详情失败')
+  }
+}
+
+// 获取步骤名称
+const getStepName = (taskKey) => {
+  if (!workflowHistory.value || !Array.isArray(workflowHistory.value)) {
+    // 返回默认名称
+    const defaultNames = {
+      'manager_identification': '客户经理认定',
+      'branch_review': '二级分行绿色金融管理岗',
+      'first_approval': '一级分行绿色金融管理岗',
+      'final_review': '绿色金融复核岗'
+    }
+    return defaultNames[taskKey] || '未知节点'
+  }
+  
+  const task = workflowHistory.value.find(t => t && t.task_key === taskKey)
+  if (task && task.task_name) {
+    return task.task_name
+  }
+  
+  // 如果没找到，返回默认名称
+  const defaultNames = {
+    'manager_identification': '客户经理认定',
+    'branch_review': '二级分行绿色金融管理岗',
+    'first_approval': '一级分行绿色金融管理岗',
+    'final_review': '绿色金融复核岗'
+  }
+  return defaultNames[taskKey] || '未知节点'
+}
+
+// 获取任务信息（用于显示提交人和提交时间）
+const getTaskInfo = (taskKey) => {
+  if (!workflowHistory.value || !Array.isArray(workflowHistory.value)) {
+    return null
+  }
+  
+  const task = workflowHistory.value.find(t => t && t.task_key === taskKey && t.completed_at)
+  return task
+}
+
+// 获取步骤状态
+const getStepStatus = (taskKey) => {
+  if (taskKey === 'start') {
+    // 开始节点，如果有任何已完成的任务，就标记为成功
+    const hasCompletedTasks = workflowHistory.value && workflowHistory.value.some(t => t && t.status === '已完成')
+    return hasCompletedTasks ? 'success' : 'wait'
+  }
+  
+  if (taskKey === 'end') {
+    // 结束节点，检查是否所有任务都已完成
+    const allCompleted = workflowHistory.value && workflowHistory.value.every(t => t && t.status === '已完成')
+    return allCompleted ? 'success' : 'wait'
+  }
+  
+  // 检查该任务是否已完成
+  const task = getTaskInfo(taskKey)
+  return task && task.status === '已完成' ? 'success' : 'wait'
+}
+
+onMounted(() => {
+  loadData()
+})
+
+// 监听路由变化，自动刷新数据
+watch(() => route.query.t, () => {
+  loadData()
+})
+</script>
+
+<style scoped>
+.task-page {
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.step-description {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.flow-chart-container {
+  width: 100%;
+  height: 400px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.flow-graph-container {
+  width: 100%;
+  height: 100%;
+}
+
+.flow-empty {
+  padding: 40px 0;
+}
+
+.custom-flow {
+  position: relative;
+  min-width: 100%;
+}
+
+.flow-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.flow-row {
+  position: relative;
+  min-height: 120px;
+  margin: 0 0 40px 0;
+  padding-left: 50px; /* 为第一个节点预留空间 */
+}
+
+.flow-path {
+  position: relative;
+  min-height: 120px;
+  margin: 0;
+  padding-right: 50px;
+}
+
+.flow-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200px; /* 增加高度以容纳行间曲线 */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.flow-empty {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.flow-node {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  text-align: center;
+  z-index: 1;
+  top: -40px; /* 向上调整以与连线对齐 */
+}
+
+.node-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 20px;
+  background-color: #f5f7fa;
+  color: #909399;
+  border: 2px solid #dcdfe6;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* 连线应该连接到图标的中心，通过调整SVG的line位置 */
+.flow-node .node-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+}
+
+.node-finish .node-icon {
+  background-color: #67C23A;
+  color: white;
+  border-color: #67C23A;
+}
+
+.node-process .node-icon {
+  background-color: #409EFF;
+  color: white;
+  border-color: #409EFF;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(64, 158, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(64, 158, 255, 0);
+  }
+}
+
+.node-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133 !important;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.node-desc {
+  font-size: 12px;
+  color: #606266 !important;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.node-info {
+  font-size: 11px;
+  color: #909399 !important;
+  line-height: 1.4;
+}
+
+.timeline-content {
+  padding: 10px 0;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.timeline-title {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.timeline-detail {
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.timeline-result {
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.result-agree {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.result-disagree {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.timeline-comment,
+.timeline-reason {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.category-trace {
+  padding: 20px;
+}
+
+.trace-card {
+  margin-bottom: 10px;
+}
+
+.trace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.trace-title {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.trace-detail {
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.trace-category {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+}
+
+.category-label {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 5px;
+}
+
+.category-value {
+  font-size: 13px;
+  color: #303133;
+  line-height: 1.5;
+}
+
+.trace-category-empty {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.flow-chart {
+  padding: 40px 20px;
+}
+</style>

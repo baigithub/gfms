@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                 xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                 xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                 xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                 xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                 id="Definitions_1"
+                 targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="Process_1" isExecutable="false" name="绿色贷款认定流程">
+    <bpmn:startEvent id="StartEvent_1" name="开始"/>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Task_1"/>
+    <bpmn:userTask id="Task_1" name="客户经理提交" camunda:assignee="${initiator}"/>
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_1" targetRef="Gateway_1"/>
+    <bpmn:exclusiveGateway id="Gateway_1" name="判断上级机构级别"/>
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Gateway_1" targetRef="Task_2" name="二级分行">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${parent_org_level == 2}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Gateway_1" targetRef="Task_3" name="一级分行">
+      <bpmn:conditionExpression xsi:type="tFormalExpression">${parent_org_level == 1}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Task_2" name="二级分行绿色金融管理岗" camunda:candidateGroups="二级分行绿色金融管理岗"/>
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_2" targetRef="Task_3"/>
+    <bpmn:userTask id="Task_3" name="一级分行绿色金融管理岗" camunda:candidateGroups="一级分行绿色金融管理岗"/>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_3" targetRef="Task_4"/>
+    <bpmn:userTask id="Task_4" name="一级分行绿色金融复核岗" camunda:candidateGroups="一级分行绿色金融复核岗"/>
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_4" targetRef="EndEvent_1"/>
+    <bpmn:endEvent id="EndEvent_1" name="结束"/>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+      <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+        <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+          <dc:Bounds x="150" y="180" width="36" height="36"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Task_1_di" bpmnElement="Task_1">
+          <dc:Bounds x="240" y="158" width="100" height="80"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Gateway_1_di" bpmnElement="Gateway_1" isMarkerVisible="true">
+          <dc:Bounds x="395" y="173" width="50" height="50"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Task_2_di" bpmnElement="Task_2">
+          <dc:Bounds x="480" y="100" width="100" height="80"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Task_3_di" bpmnElement="Task_3">
+          <dc:Bounds x="610" y="158" width="100" height="80"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="Task_4_di" bpmnElement="Task_4">
+          <dc:Bounds x="760" y="158" width="100" height="80"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+          <dc:Bounds x="890" y="180" width="36" height="36"/>
+        </bpmndi:BPMNShape>
+        <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+          <di:waypoint x="186" y="198"/>
+          <di:waypoint x="240" y="198"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+          <di:waypoint x="340" y="198"/>
+          <di:waypoint x="395" y="198"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+          <di:waypoint x="420" y="173"/>
+          <di:waypoint x="420" y="140"/>
+          <di:waypoint x="480" y="140"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+          <di:waypoint x="445" y="198"/>
+          <di:waypoint x="610" y="198"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+          <di:waypoint x="580" y="140"/>
+          <di:waypoint x="610" y="140"/>
+          <di:waypoint x="635" y="140"/>
+          <di:waypoint x="635" y="158"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+          <di:waypoint x="710" y="198"/>
+          <di:waypoint x="760" y="198"/>
+        </bpmndi:BPMNEdge>
+        <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+          <di:waypoint x="860" y="198"/>
+          <di:waypoint x="890" y="198"/>
+        </bpmndi:BPMNEdge>
+      </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+  </bpmn:definitions>

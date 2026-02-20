@@ -1,0 +1,869 @@
+from datetime import datetime
+from typing import Optional, List
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, text
+
+from app.models.green_finance import (
+    GreenIdentification,
+    WorkflowInstance,
+    WorkflowTask,
+    TaskStatus
+)
+from app.models.user import User, Role, Organization
+from app.schemas.green_finance import (
+    GreenIdentificationCreate,
+    GreenIdentificationUpdate,
+    WorkflowTaskCreate,
+    TaskQuery,
+    TaskListItem
+)
+
+
+class WorkflowEngine:
+    """
+    绿色认定工作流引擎
+    实现以下流程:
+    1. 客户经理发起认定 -> 2. 二级分行绿色金融管理岗审核 -> 3. 一级分行绿色金融管理岗审批 -> 4. 绿色金融复核岗复核 -> 5. 结束
+    """
+    
+    PROCESS_NODES = {
+        "start": {"name": "开始", "type": "start"},
+        "manager_identification": {"name": "客户经理认定", "type": "task", "assignee": "客户经理"},
+        "branch_review": {"name": "二级分行绿色金融管理岗", "type": "task", "assignee": "绿色金融管理岗"},
+        "first_approval": {"name": "一级分行绿色金融管理岗", "type": "task", "assignee": "绿色金融管理岗"},
+        "final_review": {"name": "绿色金融复核岗", "type": "task", "assignee": "绿色金融复核岗"},
+        "end": {"name": "结束", "type": "end"}
+    }
+    
+    @staticmethod
+    def calculate_business_deadline(start_date: datetime, business_days: int = 3) -> datetime:
+        """计算工作日截止时间
+        
+        Args:
+            start_date: 开始时间（包含）
+            business_days: 工作日数量（默认3个工作日）
+            
+        Returns:
+            截止时间（次日凌晨0点）
+        """
+        from datetime import timedelta
+        
+        current_date = start_date
+        days_counted = 0
+        
+        while days_counted < business_days:
+            current_date += timedelta(days=1)
+            # 跳过周末（周六=5，周日=6）
+            if current_date.weekday() < 5:  # 0-4 是周一到周五
+                days_counted += 1
+        
+        # 返回次日凌晨0点
+        return datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
+    
+    TRANSITIONS = {
+        "start": ["manager_identification"],
+        "manager_identification": ["branch_review", "end"],  # branch_review: 同意, end: 不同意
+        "branch_review": ["first_approval", "manager_identification"],  # first_approval: 同意, manager_identification: 退回
+        "first_approval": ["final_review", "branch_review"],  # final_review: 同意, branch_review: 退回
+        "final_review": ["end", "first_approval"],  # end: 同意, first_approval: 退回
+        "end": []
+    }
+    
+    @classmethod
+    def start_process(cls, db: Session, identification: GreenIdentification, initiator: User) -> WorkflowInstance:
+        """启动工作流实例"""
+        case_id = f"CASE_{datetime.now().strftime('%Y%m%d%H%M%S')}_{identification.id}"
+        
+        workflow = WorkflowInstance(
+            case_id=case_id,
+            process_key="green_identification_process",
+            business_key=identification.loan_code,
+            current_node="manager_identification",
+            status="进行中",
+            identification_id=identification.id
+        )
+        db.add(workflow)
+        db.flush()
+        
+        # 创建第一个任务，设置截止时间为三个工作日后的凌晨0点
+        deadline = cls.calculate_business_deadline(datetime.now(), 3)
+        
+        task = WorkflowTask(
+            task_key="manager_identification",
+            task_name=cls.PROCESS_NODES["manager_identification"]["name"],
+            node_id="UserTask1",
+            assignee_id=initiator.id,
+            status="待处理",
+            workflow_instance_id=workflow.id,
+            identification_id=identification.id
+        )
+        # 更新认定和任务的截止时间
+        identification.deadline = deadline
+        task.started_at = datetime.now()
+        db.add(task)
+        db.commit()
+        
+        return workflow
+    
+    @classmethod
+    def complete_task(cls, db: Session, task: WorkflowTask, approval_result: str, comment: Optional[str] = None, reason: Optional[str] = None) -> Optional[WorkflowTask]:
+        """完成任务并流转到下一节点"""
+        # 获取提交人信息
+        from app.models.user import User
+        submitter = db.query(User).get(task.assignee_id)
+        
+        # 计算islvl2变量
+        islvl2 = None
+        if submitter and submitter.org_id:
+            from app.models.user import Organization
+            user_org = db.query(Organization).get(submitter.org_id)
+            
+            if user_org and user_org.parent_id:
+                parent_org = db.query(Organization).get(user_org.parent_id)
+                
+                if parent_org and parent_org.parent_id:
+                    grandparent_org = db.query(Organization).get(parent_org.parent_id)
+                    
+                    if grandparent_org:
+                        if grandparent_org.level == 1:
+                            islvl2 = '1'
+                        elif grandparent_org.level == 2:
+                            islvl2 = '2'
+        
+        # 设置islvl2变量
+        if islvl2 is not None:
+            # 将变量存储在当前任务的variables字段中（JSON格式）
+            import json
+            existing_vars = {}
+            if task.variables:
+                try:
+                    existing_vars = json.loads(task.variables)
+                except:
+                    existing_vars = {}
+            
+            existing_vars['islvl2'] = islvl2
+            task.variables = json.dumps(existing_vars)
+        
+        task.approval_result = approval_result
+        task.comment = comment
+        task.reason = reason
+        task.completed_at = datetime.now()
+        task.status = "已完成"
+        
+        # 保存当前节点的绿色分类信息
+        identification = task.workflow_instance.identification
+        if identification:
+            task.project_category_large = identification.project_category_large
+            task.project_category_medium = identification.project_category_medium
+            task.project_category_small = identification.project_category_small
+            # 获取格式化的分类名称
+            formatted_category = get_formatted_category(db, identification)
+            task.formatted_category = formatted_category
+        
+        workflow = task.workflow_instance
+        
+        # 获取下一节点
+        current_node = workflow.current_node
+        transitions = cls.TRANSITIONS.get(current_node, [])
+        
+        print(f"DEBUG: workflow.current_node={current_node}, transitions={transitions}")
+        
+        next_node = None
+        if approval_result == "同意":
+            # 根据islvl2变量决定下一个节点
+            if current_node == "manager_identification":
+                # 直接使用内存中计算的islvl2值
+                print(f"DEBUG: current_node={current_node}, islvl2={islvl2}")
+                if islvl2 == "1":
+                    # islvl2=1，支行位于一级分行下，直接走一级分行绿色金融管理岗
+                    next_node = "first_approval"
+                elif islvl2 == "2":
+                    # islvl2=2，支行位于二级分行下，走二级分行绿色金融管理岗
+                    next_node = "branch_review"
+                else:
+                    # 默认走第一个节点
+                    next_node = transitions[0] if transitions else "end"
+                print(f"DEBUG: next_node={next_node}")
+            elif current_node == "branch_review":
+                # 二级分行绿色金融管理岗完成后，走一级分行绿色金融管理岗
+                next_node = "first_approval"
+            elif current_node == "first_approval":
+                # 一级分行绿色金融管理岗完成后，走绿色金融复核岗
+                next_node = "final_review"
+            else:
+                # 其他节点走默认逻辑
+                next_node = transitions[0] if transitions else "end"
+        elif approval_result in ["不同意", "退回"]:
+            next_node = transitions[-1] if len(transitions) > 1 else None
+        
+        if not next_node:
+            workflow.status = "已办结"
+            workflow.ended_at = datetime.now()
+            workflow.current_node = "end"
+            
+            # 更新认定状态
+            identification = workflow.identification
+            identification.status = TaskStatus.ARCHIVED.value if approval_result == "同意" else TaskStatus.REJECTED.value
+            identification.completed_at = datetime.now()
+            db.commit()
+            return None
+        
+        # 流转到下一节点
+        workflow.current_node = next_node
+        
+        if next_node == "end":
+            workflow.status = "已办结"
+            workflow.ended_at = datetime.now()
+            
+            identification = workflow.identification
+            identification.status = TaskStatus.ARCHIVED.value
+            identification.completed_at = datetime.now()
+            db.commit()
+            return None
+        
+        # 检查当前workflow实例是否已经有待处理任务，防止重复创建
+        existing_pending_task = db.query(WorkflowTask).filter(
+            WorkflowTask.workflow_instance_id == workflow.id,
+            WorkflowTask.status == "待处理",
+            WorkflowTask.id != task.id  # 排除当前正在完成的任务
+        ).first()
+        
+        if existing_pending_task:
+            raise ValueError(f"当前流程已有待处理任务（{existing_pending_task.task_name}），无法创建新任务")
+        
+        # 创建下一节点任务
+        node_info = cls.PROCESS_NODES.get(next_node, {})
+        
+        # 根据当前认定的机构，查找下一节点的处理人
+        assignee = cls._find_assignee(db, next_node, task.identification_id)
+        
+        if not assignee:
+            raise ValueError(f"无法找到{node_info.get('name', next_node)}的处理人")
+        
+        # 计算新的截止时间（从当前时间开始三个工作日后的凌晨0点）
+        new_deadline = cls.calculate_business_deadline(datetime.now(), 3)
+        
+        next_task = WorkflowTask(
+            task_key=next_node,
+            task_name=node_info.get("name", next_node),
+            node_id=f"UserTask_{next_node}",
+            assignee_id=assignee.id,
+            status="待处理",
+            workflow_instance_id=workflow.id,
+            identification_id=task.identification_id,
+            # 继承认定任务的绿色分类信息
+            project_category_large=identification.project_category_large,
+            project_category_medium=identification.project_category_medium,
+            project_category_small=identification.project_category_small,
+            formatted_category=get_formatted_category(db, identification)
+        )
+        db.add(next_task)
+        
+        # 更新认定状态、当前处理人和截止时间
+        identification = workflow.identification
+        identification.current_handler_id = assignee.id
+        identification.status = TaskStatus.PROCESSING.value
+        identification.deadline = new_deadline
+        db.commit()
+        
+        return next_task
+    
+    @classmethod
+    def assign_task(cls, db: Session, task: WorkflowTask, assignee: User):
+        """分配任务给用户"""
+        task.assignee_id = assignee.id
+        
+        # 更新认定的当前处理人
+        identification = db.query(GreenIdentification).filter(GreenIdentification.id == task.identification_id).first()
+        if identification:
+            identification.current_handler_id = assignee.id
+        
+        db.commit()
+    
+    @classmethod
+    def _find_assignee(cls, db: Session, next_node: str, identification_id: int) -> Optional[User]:
+        """根据机构层级查找合适的处理人"""
+        from app.models.user import Role, Organization
+        
+        # 获取当前认定信息
+        identification = db.query(GreenIdentification).filter(GreenIdentification.id == identification_id).first()
+        if not identification:
+            return None
+        
+        # 获取发起人的机构
+        initiator_org = db.query(Organization).filter(Organization.id == identification.org_id).first()
+        if not initiator_org:
+            return None
+        
+        if next_node == "manager_identification":
+            # 客户经理认定：返回认定的发起人
+            initiator = db.query(User).filter(User.id == identification.initiator_id).first()
+            return initiator
+            
+        if next_node == "branch_review":
+            # 分行审核：查找发起人机构的父级机构中的绿色金融管理岗
+            parent_org = db.query(Organization).filter(Organization.id == initiator_org.parent_id).first()
+            if not parent_org:
+                return None
+            
+            # 查找该机构的绿色金融管理岗
+            role = db.query(Role).filter(Role.name == "绿色金融管理岗").first()
+            if not role:
+                return None
+            
+            assignee = db.query(User).filter(
+                User.org_id == parent_org.id,
+                User.role_id == role.id,
+                User.is_active == True
+            ).first()
+            
+            # 如果父级机构没有，尝试查找更高级别的机构
+            if not assignee and parent_org.parent_id:
+                grandparent_org = db.query(Organization).filter(Organization.id == parent_org.parent_id).first()
+                if grandparent_org:
+                    assignee = db.query(User).filter(
+                        User.org_id == grandparent_org.id,
+                        User.role_id == role.id,
+                        User.is_active == True
+                    ).first()
+            
+            return assignee
+            
+        elif next_node == "first_approval":
+            # 一级分行绿色金融管理岗：查找一级分行的绿色金融管理岗
+            role = db.query(Role).filter(Role.name == "绿色金融管理岗").first()
+            if not role:
+                return None
+            
+            # 获取发起人的机构
+            initiator_org = db.query(Organization).filter(Organization.id == identification.org_id).first()
+            if not initiator_org:
+                return None
+            
+            # 一级分行绿色金融管理岗：查找parent_id指向level=1的level=2机构（一级分行）的绿色金融管理岗
+            assignee = db.query(User).filter(
+                User.role_id == role.id,
+                User.is_active == True
+            ).join(Organization, User.org_id == Organization.id).filter(
+                Organization.level == 2,
+                Organization.parent_id.in_(
+                    db.query(Organization.id).filter(Organization.level == 1)
+                )
+            ).first()
+            
+            return assignee
+            
+        elif next_node == "final_review":
+            # 绿色金融复核岗：查找绿色金融复核岗
+            role = db.query(Role).filter(Role.name == "绿色金融复核岗").first()
+            if not role:
+                return None
+            
+            # 查找绿色金融复核岗
+            assignee = db.query(User).filter(
+                User.role_id == role.id,
+                User.is_active == True
+            ).first()
+            
+            return assignee
+        
+        return None
+    
+    @classmethod
+    def withdraw_task(cls, db: Session, task: WorkflowTask, user: User):
+        """撤回任务
+        
+        撤回规则：
+        1. 只能撤回已完成的任务
+        2. 检查下一个节点的任务状态，如果是"待处理"（未做暂存或提交），则可以撤回
+        3. 如果下一个节点任务已经是"已完成"，则不能撤回
+        4. 一级分行绿色金融复核岗（final_review）完成后不能撤回
+        
+        撤回时保留完整的历史记录：
+        - 原本的"已完成"任务记录保持不变
+        - 下一节点的待处理任务标记为"已撤回"
+        - 创建新的"待处理"任务给当前用户
+        """
+        if task.status != "已完成":
+            raise ValueError("只能撤回已完成的任务")
+        
+        if task.assignee_id != user.id:
+            raise ValueError("只能撤回自己经办的任务")
+        
+        current_node = task.task_key
+        
+        # 一级分行绿色金融复核岗完成后不能撤回
+        if current_node == "final_review":
+            raise ValueError("一级分行绿色金融复核岗完成后不能撤回")
+        
+        # 检查下一个节点的任务状态
+        workflow = task.workflow_instance
+        next_node = cls._get_next_node(current_node)
+        
+        if next_node:
+            # 检查下一节点是否有已完成任务（已经提交审批）
+            next_completed_task = db.query(WorkflowTask).filter(
+                WorkflowTask.workflow_instance_id == workflow.id,
+                WorkflowTask.task_key == next_node,
+                WorkflowTask.status == "已完成"
+            ).first()
+            
+            if next_completed_task:
+                raise ValueError(f"无法撤回：下一个节点（{cls.PROCESS_NODES[next_node]['name']}）已经提交审批，无法撤回")
+            
+            # 将下一节点的待处理任务标记为"已撤回"，而不是删除
+            next_pending_task = db.query(WorkflowTask).filter(
+                WorkflowTask.workflow_instance_id == workflow.id,
+                WorkflowTask.task_key == next_node,
+                WorkflowTask.status == "待处理"
+            ).first()
+            
+            if next_pending_task:
+                next_pending_task.status = "已撤回"
+                next_pending_task.completed_at = datetime.now()
+                next_pending_task.approval_result = "撤回"
+                next_pending_task.reason = "撤回操作"
+        
+        # 创建新的待处理任务给当前用户，而不是修改当前任务的状态
+        # 这样可以保留原本的"已完成"任务记录
+        node_info = cls.PROCESS_NODES.get(current_node, {})
+        
+        new_task = WorkflowTask(
+            task_key=current_node,
+            task_name=node_info.get("name", current_node),
+            node_id=f"UserTask_{current_node}",
+            assignee_id=user.id,
+            status="待处理",
+            approval_result=None,
+            reason=None,
+            started_at=datetime.now(),
+            completed_at=None,
+            workflow_instance_id=workflow.id,
+            identification_id=task.identification_id,
+            variables=task.variables,
+            # 复制绿色分类信息
+            project_category_large=task.project_category_large,
+            project_category_medium=task.project_category_medium,
+            project_category_small=task.project_category_small,
+            formatted_category=task.formatted_category
+        )
+        
+        # 将原本的已完成任务标记为已撤回，这样就不会出现在已办列表中
+        task.status = "已撤回"
+        task.approval_result = "撤回"
+        task.reason = "用户撤回操作"
+        task.completed_at = datetime.now()
+        
+        db.add(new_task)
+        
+        # 更新流程实例的当前节点
+        workflow.current_node = current_node
+        workflow.status = "running"
+        
+        # 更新认定信息的处理人
+        identification = task.identification
+        identification.current_handler_id = user.id
+        identification.status = TaskStatus.PROCESSING.value
+        
+        db.commit()
+    @classmethod
+    def _get_next_node(cls, current_node: str) -> Optional[str]:
+        """获取当前节点的下一个节点"""
+        transitions = cls.TRANSITIONS.get(current_node, [])
+        return transitions[0] if transitions else None
+    
+    @classmethod
+    def _get_previous_node(cls, current_node: str) -> Optional[str]:
+        """获取当前节点的上一个节点"""
+        previous_map = {
+            "branch_review": "manager_identification",
+            "first_approval": "branch_review",
+            "final_review": "first_approval"
+        }
+        return previous_map.get(current_node)
+    
+    @classmethod
+    def return_task(cls, db: Session, task: WorkflowTask, return_to_node: str, comment: Optional[str] = None, user: User = None):
+        """退回任务
+        
+        退回规则：
+        1. 客户经理（manager_identification）：不能退回
+        2. 二级分行绿色金融管理岗（branch_review）：可以退回到客户经理
+        3. 一级分行绿色金融管理岗（first_approval）：可以退回给客户经理或二级分行绿色金融管理岗
+        4. 一级分行绿色金融复核岗（final_review）：可以退回到客户经理、二级分行绿色金融管理岗或一级分行绿色金融管理岗
+        """
+        if task.status != "待处理":
+            raise ValueError("只能退回待处理的任务")
+        
+        current_node = task.task_key
+        
+        # 客户经理不能退回
+        if current_node == "manager_identification":
+            raise ValueError("客户经理不能退回")
+        
+        # 验证退回目标节点是否合法
+        valid_return_nodes = cls._get_valid_return_nodes(current_node)
+        if return_to_node not in valid_return_nodes:
+            raise ValueError(f"当前节点不能退回到 {return_to_node}")
+        
+        # 标记当前任务为已退回
+        task.status = "已退回"
+        task.completed_at = datetime.now()
+        task.approval_result = "退回"
+        task.comment = comment
+        task.reason = f"退回到 {cls.PROCESS_NODES[return_to_node]['name']}"
+        
+        # 更新流程实例的当前节点
+        workflow = task.workflow_instance
+        workflow.current_node = return_to_node
+        
+        # 保存当前任务的分类信息
+        identification = workflow.identification
+        if identification:
+            task.project_category_large = identification.project_category_large
+            task.project_category_medium = identification.project_category_medium
+            task.project_category_small = identification.project_category_small
+            # 获取格式化的分类名称
+            formatted_category = get_formatted_category(db, identification)
+            task.formatted_category = formatted_category
+        
+        # 获取退回目标节点的处理人
+        assignee = cls._find_assignee(db, return_to_node, identification.id)
+        
+        if not assignee:
+            raise ValueError(f"无法找到{cls.PROCESS_NODES[return_to_node]['name']}的处理人")
+        
+        # 创建退回目标节点的新任务
+        new_task = WorkflowTask(
+            task_key=return_to_node,
+            task_name=cls.PROCESS_NODES[return_to_node]["name"],
+            node_id=f"UserTask_{return_to_node}",
+            assignee_id=assignee.id,
+            status="待处理",
+            workflow_instance_id=workflow.id,
+            identification_id=task.identification_id
+        )
+        # 将原本的已完成任务标记为已撤回，这样就不会出现在已办列表中
+        task.status = "已撤回"
+        task.approval_result = "撤回"
+        task.reason = "用户撤回操作"
+        task.completed_at = datetime.now()
+        
+        db.add(new_task)
+        
+        identification.current_handler_id = assignee.id
+        identification.status = TaskStatus.PROCESSING.value
+        db.commit()
+    
+    @classmethod
+    def _get_valid_return_nodes(cls, current_node: str) -> List[str]:
+        """获取当前节点可以退回的节点列表"""
+        return_nodes_map = {
+            "manager_identification": [],  # 客户经理不能退回
+            "branch_review": ["manager_identification"],  # 二级分行绿色金融管理岗可以退回到客户经理
+            "first_approval": ["manager_identification", "branch_review"],  # 一级分行绿色金融管理岗可以退回到客户经理或二级分行绿色金融管理岗
+            "final_review": ["manager_identification", "branch_review", "first_approval"]  # 一级分行绿色金融复核岗可以退回到客户经理、二级分行绿色金融管理岗或一级分行绿色金融管理岗
+        }
+        return return_nodes_map.get(current_node, [])
+
+
+def get_user_tasks(db: Session, user: User, status: str) -> List[TaskListItem]:
+    """获取用户的任务列表"""
+    query = db.query(WorkflowTask, GreenIdentification, User).join(
+        GreenIdentification, WorkflowTask.identification_id == GreenIdentification.id
+    ).join(
+        User, WorkflowTask.assignee_id == User.id
+    ).filter(
+        WorkflowTask.assignee_id == user.id
+    )
+    
+    # 根据状态过滤任务
+    if status == "待处理":
+        query = query.filter(WorkflowTask.status == "待处理")
+    elif status == "已完成":
+        # 已办任务包括已完成和已退回的任务
+        query = query.filter(WorkflowTask.status.in_(["已完成", "已退回"]))
+    
+    # 对于已办任务，排除流程已完结的任务
+    if status == "已完成":
+        query = query.filter(GreenIdentification.status != "办结")
+    
+    query = query.order_by(WorkflowTask.started_at.desc())  # 按任务创建时间倒序排列
+    
+    tasks = query.all()
+    
+    items = []
+    for task, identification, assignee in tasks:
+        # 获取该流程中所有有分类信息的任务，按时间倒序排列，取最新的
+        tasks_with_category = db.query(WorkflowTask).filter(
+            WorkflowTask.identification_id == identification.id,
+            WorkflowTask.formatted_category.isnot(None)
+        ).order_by(WorkflowTask.started_at.desc()).all()
+        
+        # 使用最新节点的绿色分类信息
+        if tasks_with_category and tasks_with_category[0].formatted_category:
+            formatted_category = tasks_with_category[0].formatted_category
+        else:
+            formatted_category = get_formatted_category(db, identification)
+        
+        items.append(TaskListItem(
+            id=identification.id,
+            identification_id=f"ID-{identification.id}",  # 添加identification_id字段
+            task_id=task.id,  # 添加task_id字段
+            loan_code=identification.loan_code,
+            customer_name=identification.customer_name,
+            business_type=identification.business_type or "",
+            loan_account=identification.loan_account or "",
+            loan_amount=identification.loan_amount or 0,
+            disbursement_date=identification.disbursement_date or datetime.now(),
+            project_category_small=identification.project_category_small or "",
+            formatted_category=formatted_category,
+            deadline=identification.deadline,
+            status=identification.status,
+            initiator_name=initiator_name(db, identification.initiator_id),
+            completed_at=identification.completed_at,
+            org_name=None
+        ))
+    
+    return items
+
+
+def initiator_name(db: Session, initiator_id: Optional[int]) -> str:
+    if not initiator_id:
+        return ""
+    user = db.query(User).filter(User.id == initiator_id).first()
+    return user.real_name if user else ""
+
+
+def query_tasks(db: Session, query_params: TaskQuery, status: str, user: Optional[User] = None, org_id: Optional[int] = None, restrict_to_assigned: bool = False) -> tuple[List[TaskListItem], int]:
+    """查询任务列表"""
+    query = db.query(GreenIdentification, User).outerjoin(
+        User, GreenIdentification.initiator_id == User.id
+    ).filter(GreenIdentification.status == status)
+    
+    # 如果限制只显示用户经办的已办结任务，添加子查询过滤
+    if restrict_to_assigned and user:
+        # 获取用户在工作流中有任务记录的所有identification_id
+        assigned_identification_ids = db.query(WorkflowTask.identification_id).filter(
+            WorkflowTask.assignee_id == user.id
+        ).distinct().all()
+        assigned_identification_ids = [id[0] for id in assigned_identification_ids]
+        
+        if assigned_identification_ids:
+            query = query.filter(GreenIdentification.id.in_(assigned_identification_ids))
+        else:
+            # 如果用户没有任何任务记录，返回空结果
+            return [], 0
+    
+    if query_params.customer_name:
+        query = query.filter(GreenIdentification.customer_name.like(f"%{query_params.customer_name}%"))
+    
+    if query_params.business_type:
+        query = query.filter(GreenIdentification.business_type == query_params.business_type)
+    
+    if query_params.loan_account:
+        query = query.filter(GreenIdentification.loan_account.like(f"%{query_params.loan_account}%"))
+    
+    if query_params.project_category:
+        query = query.filter(
+            or_(
+                GreenIdentification.project_category_large.like(f"%{query_params.project_category}%"),
+                GreenIdentification.project_category_medium.like(f"%{query_params.project_category}%"),
+                GreenIdentification.project_category_small.like(f"%{query_params.project_category}%")
+            )
+        )
+    
+    if query_params.disbursement_date_start:
+        query = query.filter(GreenIdentification.disbursement_date >= query_params.disbursement_date_start)
+    
+    if query_params.disbursement_date_end:
+        query = query.filter(GreenIdentification.disbursement_date <= query_params.disbursement_date_end)
+    
+    if status == TaskStatus.ARCHIVED.value and query_params.completed_date_start:
+        query = query.filter(GreenIdentification.completed_at >= query_params.completed_date_start)
+    
+    if status == TaskStatus.ARCHIVED.value and query_params.completed_date_end:
+        query = query.filter(GreenIdentification.completed_at <= query_params.completed_date_end)
+    
+    if query_params.deadline_start:
+        query = query.filter(GreenIdentification.deadline >= query_params.deadline_start)
+    
+    if query_params.deadline_end:
+        query = query.filter(GreenIdentification.deadline <= query_params.deadline_end)
+    
+    if org_id:
+        query = query.filter(GreenIdentification.org_id == org_id)
+    
+    # 添加排序逻辑：按办结时间倒序，如果没有办结时间则按创建时间倒序
+    if status == TaskStatus.ARCHIVED.value:
+        # MySQL不支持nulls_last()，使用CASE WHEN来模拟
+        from sqlalchemy import case
+        query = query.order_by(
+            case(
+                (GreenIdentification.completed_at == None, 1),
+                (GreenIdentification.completed_at != None, 0),
+                else_=2
+            ).asc(),
+            GreenIdentification.completed_at.desc(),
+            GreenIdentification.created_at.desc()
+        )
+    else:
+        query = query.order_by(GreenIdentification.created_at.desc())
+    
+    total = query.count()
+    
+    items = []
+    for identification, initiator in query.all():
+        # 获取该认定记录的最新已完成任务的绿色分类信息
+        latest_task = db.query(WorkflowTask).filter(
+            WorkflowTask.identification_id == identification.id,
+            WorkflowTask.status == "已完成",
+            WorkflowTask.formatted_category.isnot(None),
+            WorkflowTask.formatted_category != ""
+        ).order_by(WorkflowTask.completed_at.desc()).first()
+        
+        # 如果最新的任务有分类信息，使用最新的；否则使用当前的 identification 信息
+        if latest_task and latest_task.formatted_category:
+            formatted_category = latest_task.formatted_category
+        else:
+            formatted_category = get_formatted_category(db, identification)
+        
+        items.append(TaskListItem(
+            id=identification.id,
+            identification_id=f"ID-{identification.id}",  # 添加带前缀的identification_id
+            task_id=latest_task.id if latest_task else identification.id,  # 添加task_id字段
+            loan_code=identification.loan_code,
+            customer_name=identification.customer_name,
+            business_type=identification.business_type or "",
+            loan_account=identification.loan_account or "",
+            loan_amount=identification.loan_amount or 0,
+            disbursement_date=identification.disbursement_date or datetime.now(),
+            project_category_small=identification.project_category_small or "",
+            formatted_category=formatted_category,
+            deadline=identification.deadline,
+            status=identification.status,
+            initiator_name=initiator.real_name if initiator else "",
+            completed_at=identification.completed_at,
+            org_name=None
+        ))
+    
+    return items, total
+
+
+def get_formatted_category(db: Session, identification: GreenIdentification) -> Optional[str]:
+    """获取格式化的带编号的分类名称"""
+    large = identification.project_category_large
+    medium = identification.project_category_medium
+    small = identification.project_category_small
+    
+    if not large and not medium and not small:
+        return None
+    
+    # 尝试匹配完整的三级分类
+    result = db.execute(text("""
+        SELECT formatted_name
+        FROM green_project_categories
+        WHERE large_name = :large AND medium_name = :medium AND small_name = :small
+        LIMIT 1
+    """), {"large": large, "medium": medium, "small": small}).fetchone()
+    
+    if result:
+        return result[0]
+    
+    # 如果没有找到三级分类，尝试匹配二级分类
+    result = db.execute(text("""
+        SELECT formatted_name
+        FROM green_project_categories
+        WHERE large_name = :large AND medium_name = :medium AND small_code IS NULL
+        LIMIT 1
+    """), {"large": large, "medium": medium}).fetchone()
+    
+    if result:
+        return result[0]
+    
+    # 如果还是没有，手动拼接带编号的格式
+    # 需要查找编号
+    large_code = None
+    medium_code = None
+    small_code = None
+    
+    if large:
+        result = db.execute(text("""
+            SELECT large_code
+            FROM green_project_categories
+            WHERE large_name = :large
+            ORDER BY large_code DESC
+            LIMIT 1
+        """), {"large": large}).fetchone()
+        if result:
+            large_code = result[0]
+    
+    if medium:
+        # 如果已经知道 large_code，在查询中添加过滤条件
+        if large_code:
+            result = db.execute(text("""
+                SELECT medium_code, large_code
+                FROM green_project_categories
+                WHERE large_name = :large AND medium_name = :medium AND large_code = :large_code
+                LIMIT 1
+            """), {"large": large, "medium": medium, "large_code": large_code}).fetchone()
+        else:
+            result = db.execute(text("""
+                SELECT medium_code, large_code
+                FROM green_project_categories
+                WHERE large_name = :large AND medium_name = :medium
+                ORDER BY large_code DESC, medium_code DESC
+                LIMIT 1
+            """), {"large": large, "medium": medium}).fetchone()
+        
+        if result:
+            medium_code = result[0]
+            # 如果之前没有large_code，使用查询到的large_code
+            if not large_code:
+                large_code = result[1]
+    
+    if small:
+        # 如果已经知道 large_code 和 medium_code，在查询中添加过滤条件
+        if large_code and medium_code:
+            result = db.execute(text("""
+                SELECT small_code, large_code, medium_code
+                FROM green_project_categories
+                WHERE large_name = :large AND medium_name = :medium AND small_name = :small
+                  AND large_code = :large_code AND medium_code = :medium_code
+                LIMIT 1
+            """), {"large": large, "medium": medium, "small": small, "large_code": large_code, "medium_code": medium_code}).fetchone()
+        else:
+            result = db.execute(text("""
+                SELECT small_code, large_code, medium_code
+                FROM green_project_categories
+                WHERE large_name = :large AND medium_name = :medium AND small_name = :small
+                ORDER BY large_code DESC, medium_code DESC, small_code DESC
+                LIMIT 1
+            """), {"large": large, "medium": medium, "small": small}).fetchone()
+        
+        if result:
+            small_code = result[0]
+            # 验证并更新large_code和medium_code以确保一致性
+            if result[1]:
+                large_code = result[1]
+            if result[2]:
+                medium_code = result[2]
+    
+    # 手动拼接带编号的格式
+    parts = []
+    if large_code and large:
+        parts.append(f"{large_code} {large}")
+    elif large:
+        parts.append(large)
+    
+    if medium_code and medium:
+        parts.append(f"{medium_code} {medium}")
+    elif medium:
+        parts.append(medium)
+    
+    if small_code and small:
+        parts.append(f"{small_code} {small}")
+    elif small:
+        parts.append(small)
+    
+    return '/'.join(parts) if parts else None
