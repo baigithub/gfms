@@ -9,6 +9,8 @@ from app.models.green_finance import (
     WorkflowTask,
     TaskStatus
 )
+from app.models.workflow import ProcessDefinition
+from app.services.bpmn_parser import BPMNParser
 from app.models.user import User, Role, Organization
 from app.schemas.green_finance import (
     GreenIdentificationCreate,
@@ -21,19 +23,14 @@ from app.schemas.green_finance import (
 
 class WorkflowEngine:
     """
-    绿色认定工作流引擎
+    绿色认定工作流引擎（支持 BPMN 流程定义）
     实现以下流程:
     1. 客户经理发起认定 -> 2. 二级分行绿色金融管理岗审核 -> 3. 一级分行绿色金融管理岗审批 -> 4. 绿色金融复核岗复核 -> 5. 结束
     """
     
-    PROCESS_NODES = {
-        "start": {"name": "开始", "type": "start"},
-        "manager_identification": {"name": "客户经理认定", "type": "task", "assignee": "客户经理"},
-        "branch_review": {"name": "二级分行绿色金融管理岗", "type": "task", "assignee": "绿色金融管理岗"},
-        "first_approval": {"name": "一级分行绿色金融管理岗", "type": "task", "assignee": "绿色金融管理岗"},
-        "final_review": {"name": "绿色金融复核岗", "type": "task", "assignee": "绿色金融复核岗"},
-        "end": {"name": "结束", "type": "end"}
-    }
+    # 流程定义缓存
+    _process_definition_cache = None
+    _process_definition_cache_time = None
     
     @staticmethod
     def calculate_business_deadline(start_date: datetime, business_days: int = 3) -> datetime:
@@ -60,25 +57,64 @@ class WorkflowEngine:
         # 返回次日凌晨0点
         return datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
     
-    TRANSITIONS = {
-        "start": ["manager_identification"],
-        "manager_identification": ["branch_review", "end"],  # branch_review: 同意, end: 不同意
-        "branch_review": ["first_approval", "manager_identification"],  # first_approval: 同意, manager_identification: 退回
-        "first_approval": ["final_review", "branch_review"],  # final_review: 同意, branch_review: 退回
-        "final_review": ["end", "first_approval"],  # end: 同意, first_approval: 退回
-        "end": []
-    }
-    
     @classmethod
     def start_process(cls, db: Session, identification: GreenIdentification, initiator: User) -> WorkflowInstance:
         """启动工作流实例"""
+        # 获取启用状态的流程定义（根据流程名称）
+        process_definition = db.query(ProcessDefinition).filter(
+            ProcessDefinition.name == "绿色认定",
+            ProcessDefinition.status == "active"
+        ).first()
+        
+        if not process_definition:
+            raise ValueError("未找到启用状态的流程定义，请先启用一个流程版本")
+        
+        # 解析 BPMN XML
+        try:
+            parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+        except Exception as e:
+            raise ValueError(f"解析流程定义失败: {str(e)}")
+        
+        # 找到起始节点
+        start_nodes = [n for n in parsed_process['nodes'] if n.type == 'start']
+        if not start_nodes:
+            raise ValueError("流程定义中未找到开始节点")
+        
+        start_node = start_nodes[0]
+        
+        # 从流程图中找到起始节点的后续节点
+        flow_graph = parsed_process['flow_graph']
+        next_node_ids = flow_graph.get(start_node.id, [])
+        
+        if not next_node_ids:
+            raise ValueError("流程定义中起始节点没有后续节点")
+        
+        # 获取第一个用户任务节点
+        first_task_node = None
+        for node_id in next_node_ids:
+            node = next((n for n in parsed_process['nodes'] if n.id == node_id), None)
+            if node and node.type == 'task':
+                first_task_node = node
+                break
+        
+        if not first_task_node:
+            raise ValueError("流程定义中未找到用户任务节点")
+        
+        # 将节点名称映射到 task_key
+        task_key = cls._map_node_name_to_task_key(first_task_node.name)
+        
+        # 构建节点映射（从 task_key 到节点信息）
+        nodes_map = {n.id: n for n in parsed_process['nodes']}
+        
+        # 创建工作流实例
         case_id = f"CASE_{datetime.now().strftime('%Y%m%d%H%M%S')}_{identification.id}"
         
         workflow = WorkflowInstance(
             case_id=case_id,
             process_key="green_identification_process",
+            process_definition_id=process_definition.id,
             business_key=identification.loan_code,
-            current_node="manager_identification",
+            current_node=task_key,
             status="进行中",
             identification_id=identification.id
         )
@@ -89,9 +125,9 @@ class WorkflowEngine:
         deadline = cls.calculate_business_deadline(datetime.now(), 3)
         
         task = WorkflowTask(
-            task_key="manager_identification",
-            task_name=cls.PROCESS_NODES["manager_identification"]["name"],
-            node_id="UserTask1",
+            task_key=task_key,
+            task_name=first_task_node.name,
+            node_id=first_task_node.id,
             assignee_id=initiator.id,
             status="待处理",
             workflow_instance_id=workflow.id,
@@ -108,6 +144,37 @@ class WorkflowEngine:
     @classmethod
     def complete_task(cls, db: Session, task: WorkflowTask, approval_result: str, comment: Optional[str] = None, reason: Optional[str] = None) -> Optional[WorkflowTask]:
         """完成任务并流转到下一节点"""
+        # 获取流程定义
+        workflow_instance = task.workflow_instance
+        process_definition = None
+        parsed_process = None
+        
+        # 如果workflow_instance没有绑定流程定义，动态获取启用状态的流程定义
+        if hasattr(workflow_instance, 'process_definition_id') and not workflow_instance.process_definition_id:
+            # 动态获取启用状态的流程定义
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.name == "绿色认定",
+                ProcessDefinition.status == "active"
+            ).first()
+            
+            if process_definition:
+                # 绑定流程定义到工作流实例
+                workflow_instance.process_definition_id = process_definition.id
+                db.commit()
+                print(f"已绑定流程版本v{process_definition.version}到工作流实例 {workflow_instance.id}")
+        # 检查是否有process_definition_id字段（兼容旧系统）
+        elif hasattr(workflow_instance, 'process_definition_id') and workflow_instance.process_definition_id:
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.id == workflow_instance.process_definition_id
+            ).first()
+        
+        if process_definition:
+            try:
+                parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+            except Exception as e:
+                print(f"警告: 解析流程定义失败，使用硬编码节点: {str(e)}")
+                parsed_process = None
+        
         # 获取提交人信息
         from app.models.user import User
         submitter = db.query(User).get(task.assignee_id)
@@ -164,39 +231,77 @@ class WorkflowEngine:
         
         # 获取下一节点
         current_node = workflow.current_node
-        transitions = cls.TRANSITIONS.get(current_node, [])
         
-        print(f"DEBUG: workflow.current_node={current_node}, transitions={transitions}")
+        # 必须有解析的流程定义，否则无法流转
+        if not parsed_process:
+            raise ValueError("流程定义未解析，无法完成任务")
         
+        # 从流程图决定下一个节点
         next_node = None
-        if approval_result == "同意":
-            # 根据islvl2变量决定下一个节点
-            if current_node == "manager_identification":
-                # 直接使用内存中计算的islvl2值
-                print(f"DEBUG: current_node={current_node}, islvl2={islvl2}")
-                if islvl2 == "1":
-                    # islvl2=1，支行位于一级分行下，直接走一级分行绿色金融管理岗
-                    next_node = "first_approval"
-                elif islvl2 == "2":
-                    # islvl2=2，支行位于二级分行下，走二级分行绿色金融管理岗
-                    next_node = "branch_review"
+        
+        # 在流程图中找到当前节点的后续节点
+        nodes_map = {n.id: n for n in parsed_process['nodes']}
+        flow_graph = parsed_process['flow_graph']
+        
+        # 找到当前节点对应的 BPMN 节点
+        current_bpmn_node = None
+        for node in parsed_process['nodes']:
+            if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == current_node:
+                current_bpmn_node = node
+                break
+        
+        if current_bpmn_node:
+            # 从流程图获取后续节点
+            next_node_ids = flow_graph.get(current_bpmn_node.id, [])
+            
+            if approval_result == "同意":
+                # 特殊处理 manager_identification 节点
+                if current_node == "manager_identification":
+                    # 直接使用第一个后续节点
+                    if next_node_ids:
+                        first_next_node = nodes_map.get(next_node_ids[0])
+                        if first_next_node and first_next_node.type == 'task':
+                            next_node = cls._map_node_name_to_task_key(first_next_node.name)
+                        elif first_next_node and first_next_node.type == 'end':
+                            next_node = "end"
+                        else:
+                            next_node = None
+                    else:
+                        next_node = None
                 else:
-                    # 默认走第一个节点
-                    next_node = transitions[0] if transitions else "end"
-                print(f"DEBUG: next_node={next_node}")
-            elif current_node == "branch_review":
-                # 二级分行绿色金融管理岗完成后，走一级分行绿色金融管理岗
-                next_node = "first_approval"
-            elif current_node == "first_approval":
-                # 一级分行绿色金融管理岗完成后，走绿色金融复核岗
-                next_node = "final_review"
-            else:
-                # 其他节点走默认逻辑
-                next_node = transitions[0] if transitions else "end"
-        elif approval_result in ["不同意", "退回"]:
-            next_node = transitions[-1] if len(transitions) > 1 else None
+                    # 其他节点，走第一个后续节点
+                    if next_node_ids:
+                        first_next_node = nodes_map.get(next_node_ids[0])
+                        if first_next_node:
+                            if first_next_node.type == 'task':
+                                next_node = cls._map_node_name_to_task_key(first_next_node.name)
+                            elif first_next_node.type == 'end':
+                                next_node = "end"
+                            else:
+                                # 如果是网关，需要进一步处理
+                                next_node = None
+                        else:
+                            next_node = None
+                    else:
+                        next_node = None
+            elif approval_result in ["不同意", "退回"]:
+                # 退回逻辑：查找条件表达式或默认退回路径
+                # 这里简化处理，如果序列流中有条件表达式为 "return" 或类似的，则走该路径
+                # 否则走最后一个路径
+                if next_node_ids:
+                    # 默认走最后一个节点（通常表示退回）
+                    last_next_node = nodes_map.get(next_node_ids[-1])
+                    if last_next_node and last_next_node.type == 'task':
+                        next_node = cls._map_node_name_to_task_key(last_next_node.name)
+                    else:
+                        next_node = None
+                else:
+                    next_node = None
         
         if not next_node:
+            raise ValueError(f"无法找到当前节点 {current_node} 的后续节点")
+        
+        if next_node == "end":
             workflow.status = "已办结"
             workflow.ended_at = datetime.now()
             workflow.current_node = "end"
@@ -231,22 +336,34 @@ class WorkflowEngine:
         if existing_pending_task:
             raise ValueError(f"当前流程已有待处理任务（{existing_pending_task.task_name}），无法创建新任务")
         
-        # 创建下一节点任务
-        node_info = cls.PROCESS_NODES.get(next_node, {})
+        # 必须有解析的流程定义，否则无法创建任务
+        if not parsed_process:
+            raise ValueError("流程定义未解析，无法创建任务")
+        
+        # 从流程定义中获取节点信息（不使用硬编码）
+        task_name = next_node  # 默认值
+        node_id = f"UserTask_{next_node}"
+        
+        # 通过节点名称查找节点
+        for node in parsed_process['nodes']:
+            if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == next_node:
+                task_name = node.name
+                node_id = node.id
+                break
         
         # 根据当前认定的机构，查找下一节点的处理人
         assignee = cls._find_assignee(db, next_node, task.identification_id)
         
         if not assignee:
-            raise ValueError(f"无法找到{node_info.get('name', next_node)}的处理人")
+            raise ValueError(f"无法找到{task_name}的处理人")
         
         # 计算新的截止时间（从当前时间开始三个工作日后的凌晨0点）
         new_deadline = cls.calculate_business_deadline(datetime.now(), 3)
         
         next_task = WorkflowTask(
             task_key=next_node,
-            task_name=node_info.get("name", next_node),
-            node_id=f"UserTask_{next_node}",
+            task_name=task_name,
+            node_id=node_id,
             assignee_id=assignee.id,
             status="待处理",
             workflow_instance_id=workflow.id,
@@ -281,6 +398,30 @@ class WorkflowEngine:
         db.commit()
     
     @classmethod
+    def _map_node_name_to_task_key(cls, node_name: str) -> str:
+        """将 BPMN 节点名称映射到 task_key
+        
+        根据节点名称中的关键词映射到对应的 task_key：
+        - "客户经理" -> "manager_identification"
+        - "二级分行" -> "branch_review"
+        - "一级分行" -> "first_approval"
+        - "复核" -> "final_review"
+        """
+        if "客户经理" in node_name:
+            return "manager_identification"
+        elif "二级分行" in node_name:
+            return "branch_review"
+        elif "一级分行" in node_name and "复核" in node_name:
+            return "final_review"
+        elif "一级分行" in node_name:
+            return "first_approval"
+        elif "复核" in node_name:
+            return "final_review"
+        else:
+            # 默认返回节点名称的拼音首字母或简化版本
+            return node_name.lower().replace(" ", "_")
+    
+    @classmethod
     def _find_assignee(cls, db: Session, next_node: str, identification_id: int) -> Optional[User]:
         """根据机构层级查找合适的处理人"""
         from app.models.user import Role, Organization
@@ -301,28 +442,102 @@ class WorkflowEngine:
             return initiator
             
         if next_node == "branch_review":
-            # 分行审核：查找发起人机构的父级机构中的绿色金融管理岗
-            parent_org = db.query(Organization).filter(Organization.id == initiator_org.parent_id).first()
-            if not parent_org:
-                return None
-            
-            # 查找该机构的绿色金融管理岗
+            # 分行审核：使用BPMN引擎查找处理人
             role = db.query(Role).filter(Role.name == "绿色金融管理岗").first()
             if not role:
                 return None
             
-            assignee = db.query(User).filter(
-                User.org_id == parent_org.id,
-                User.role_id == role.id,
-                User.is_active == True
+            # 获取工作流实例的流程定义
+            workflow_instance = db.query(WorkflowInstance).filter(
+                WorkflowInstance.identification_id == identification_id
             ).first()
             
-            # 如果父级机构没有，尝试查找更高级别的机构
-            if not assignee and parent_org.parent_id:
-                grandparent_org = db.query(Organization).filter(Organization.id == parent_org.parent_id).first()
-                if grandparent_org:
+            parsed_process = None
+            if workflow_instance and workflow_instance.process_definition_id:
+                process_definition = db.query(ProcessDefinition).filter(
+                    ProcessDefinition.id == workflow_instance.process_definition_id
+                ).first()
+                if process_definition:
+                    try:
+                        from app.services.bpmn_engine import BPMNParser
+                        parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+                    except Exception as e:
+                        print(f"警告: 解析流程定义失败: {str(e)}")
+            
+            # 根据BPMN流程定义中的orgLevels属性查找处理人
+            # 如果有解析的流程定义，使用其中的节点信息
+            if parsed_process:
+                # 查找当前节点信息
+                current_node_info = None
+                for node in parsed_process['nodes']:
+                    if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == next_node:
+                        current_node_info = node
+                        break
+                
+                if current_node_info and current_node_info.properties:
+                    org_levels = current_node_info.properties.get('orgLevels', [])
+                    candidate_groups = current_node_info.properties.get('candidateGroups', [])
+                    
+                    # 根据机构层级和候选组查找处理人
+                    if org_levels and candidate_groups:
+                        # 解析orgLevels
+                        import json
+                        try:
+                            levels = json.loads(org_levels) if isinstance(org_levels, str) else org_levels
+                        except:
+                            levels = []
+                        
+                        # 查找符合条件的机构
+                        org_query = db.query(Organization).filter(Organization.level.in_(levels))
+                        
+                        # 根据发起人机构进行过滤：查找发起人机构的父机构
+                        if initiator_org.parent_id:
+                            # 查找发起人机构的父级机构（无论发起人机构是level=2还是level=3）
+                            org_query = org_query.filter(Organization.id == initiator_org.parent_id)
+                        
+                        valid_orgs = org_query.all()
+                        
+                        if valid_orgs:
+                            # 查找这些机构中符合候选组的用户
+                            role_name_map = {
+                                "绿色金融管理岗": "绿色金融管理岗",
+                                "绿色金融复核岗": "绿色金融复核岗"
+                            }
+                            
+                            role_name = role_name_map.get(candidate_groups[0] if candidate_groups else "", candidate_groups[0] if candidate_groups else "")
+                            if role_name:
+                                role = db.query(Role).filter(Role.name == role_name).first()
+                                if role:
+                                    assignee = db.query(User).filter(
+                                        User.org_id.in_([org.id for org in valid_orgs]),
+                                        User.role_id == role.id,
+                                        User.is_active == True
+                                    ).first()
+                                    if assignee:
+                                        return assignee
+            
+            # 如果BPMN引擎找不到，使用原有逻辑作为后备
+            assignee = None
+            if initiator_org.level == 3 and initiator_org.parent_id:
+                parent_org = db.query(Organization).filter(Organization.id == initiator_org.parent_id).first()
+                if parent_org and parent_org.level == 2:
                     assignee = db.query(User).filter(
-                        User.org_id == grandparent_org.id,
+                        User.org_id == parent_org.id,
+                        User.role_id == role.id,
+                        User.is_active == True
+                    ).first()
+            elif initiator_org.level == 2:
+                assignee = db.query(User).filter(
+                    User.org_id == initiator_org.id,
+                    User.role_id == role.id,
+                    User.is_active == True
+                ).first()
+            
+            if not assignee and initiator_org.parent_id:
+                parent_org = db.query(Organization).filter(Organization.id == initiator_org.parent_id).first()
+                if parent_org:
+                    assignee = db.query(User).filter(
+                        User.org_id == parent_org.id,
                         User.role_id == role.id,
                         User.is_active == True
                     ).first()
@@ -392,13 +607,61 @@ class WorkflowEngine:
         
         current_node = task.task_key
         
-        # 一级分行绿色金融复核岗完成后不能撤回
-        if current_node == "final_review":
-            raise ValueError("一级分行绿色金融复核岗完成后不能撤回")
+        # 复核节点完成后不能撤回
+        # 使用current_node检查，避免依赖parsed_process
+        if "final_review" in current_node:
+            raise ValueError("一级分行复核完成后不能撤回")
         
-        # 检查下一个节点的任务状态
+        # 获取流程定义
         workflow = task.workflow_instance
-        next_node = cls._get_next_node(current_node)
+        process_definition = None
+        parsed_process = None
+        
+        if workflow.process_definition_id:
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.id == workflow.process_definition_id
+            ).first()
+        
+        if process_definition and process_definition.bpmn_xml:
+            try:
+                parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+            except Exception as e:
+                print(f"解析流程定义失败: {str(e)}")
+        
+        # 从流程定义中获取当前节点的名称
+        current_node_name = current_node
+        if parsed_process:
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == current_node:
+                    current_node_name = node.name
+                    break
+        
+        # 从流程定义中获取下一个节点的信息
+        next_node = None
+        next_node_name = None
+        
+        if parsed_process:
+            # 在流程图中找到当前节点的后续节点
+            nodes_map = {n.id: n for n in parsed_process['nodes']}
+            flow_graph = parsed_process['flow_graph']
+            
+            # 找到当前节点对应的 BPMN 节点
+            current_bpmn_node = None
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == current_node:
+                    current_bpmn_node = node
+                    break
+            
+            if current_bpmn_node:
+                # 从流程图获取后续节点
+                next_node_ids = flow_graph.get(current_bpmn_node.id, [])
+                
+                # 获取第一个用户任务节点
+                if next_node_ids:
+                    first_next_node = nodes_map.get(next_node_ids[0])
+                    if first_next_node and first_next_node.type == 'task':
+                        next_node = cls._map_node_name_to_task_key(first_next_node.name)
+                        next_node_name = first_next_node.name
         
         if next_node:
             # 检查下一节点是否有已完成任务（已经提交审批）
@@ -409,7 +672,7 @@ class WorkflowEngine:
             ).first()
             
             if next_completed_task:
-                raise ValueError(f"无法撤回：下一个节点（{cls.PROCESS_NODES[next_node]['name']}）已经提交审批，无法撤回")
+                raise ValueError(f"无法撤回：下一个节点（{next_node_name if next_node_name else next_node}）已经提交审批，无法撤回")
             
             # 将下一节点的待处理任务标记为"已撤回"，而不是删除
             next_pending_task = db.query(WorkflowTask).filter(
@@ -424,14 +687,22 @@ class WorkflowEngine:
                 next_pending_task.approval_result = "撤回"
                 next_pending_task.reason = "撤回操作"
         
+        # 设置任务名称和节点ID
+        task_name = current_node_name
+        node_id = f"UserTask_{current_node}"
+        if parsed_process:
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == current_node:
+                    task_name = node.name
+                    node_id = node.id
+                    break
+        
         # 创建新的待处理任务给当前用户，而不是修改当前任务的状态
         # 这样可以保留原本的"已完成"任务记录
-        node_info = cls.PROCESS_NODES.get(current_node, {})
-        
         new_task = WorkflowTask(
             task_key=current_node,
-            task_name=node_info.get("name", current_node),
-            node_id=f"UserTask_{current_node}",
+            task_name=task_name,
+            node_id=node_id,
             assignee_id=user.id,
             status="待处理",
             approval_result=None,
@@ -466,21 +737,6 @@ class WorkflowEngine:
         identification.status = TaskStatus.PROCESSING.value
         
         db.commit()
-    @classmethod
-    def _get_next_node(cls, current_node: str) -> Optional[str]:
-        """获取当前节点的下一个节点"""
-        transitions = cls.TRANSITIONS.get(current_node, [])
-        return transitions[0] if transitions else None
-    
-    @classmethod
-    def _get_previous_node(cls, current_node: str) -> Optional[str]:
-        """获取当前节点的上一个节点"""
-        previous_map = {
-            "branch_review": "manager_identification",
-            "first_approval": "branch_review",
-            "final_review": "first_approval"
-        }
-        return previous_map.get(current_node)
     
     @classmethod
     def return_task(cls, db: Session, task: WorkflowTask, return_to_node: str, comment: Optional[str] = None, user: User = None):
@@ -501,8 +757,25 @@ class WorkflowEngine:
         if current_node == "manager_identification":
             raise ValueError("客户经理不能退回")
         
+        # 获取流程定义
+        workflow = task.workflow_instance
+        process_definition = None
+        parsed_process = None
+        
+        if workflow.process_definition_id:
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.id == workflow.process_definition_id
+            ).first()
+        
+        if process_definition and process_definition.bpmn_xml:
+            try:
+                parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+            except Exception as e:
+                print(f"解析流程定义失败: {str(e)}")
+        
         # 验证退回目标节点是否合法
-        valid_return_nodes = cls._get_valid_return_nodes(current_node)
+        valid_return_nodes = cls._get_valid_return_nodes(current_node, parsed_process)
+        print(f"DEBUG: current_node={current_node}, return_to_node={return_to_node}, valid_return_nodes={valid_return_nodes}")
         if return_to_node not in valid_return_nodes:
             raise ValueError(f"当前节点不能退回到 {return_to_node}")
         
@@ -511,7 +784,16 @@ class WorkflowEngine:
         task.completed_at = datetime.now()
         task.approval_result = "退回"
         task.comment = comment
-        task.reason = f"退回到 {cls.PROCESS_NODES[return_to_node]['name']}"
+        
+        # 从流程定义中获取退回目标节点的名称
+        return_to_node_name = return_to_node
+        if parsed_process:
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == return_to_node:
+                    return_to_node_name = node.name
+                    break
+        
+        task.reason = f"退回到 {return_to_node_name}"
         
         # 更新流程实例的当前节点
         workflow = task.workflow_instance
@@ -531,13 +813,21 @@ class WorkflowEngine:
         assignee = cls._find_assignee(db, return_to_node, identification.id)
         
         if not assignee:
-            raise ValueError(f"无法找到{cls.PROCESS_NODES[return_to_node]['name']}的处理人")
+            raise ValueError(f"无法找到{return_to_node_name}的处理人")
+        
+        # 从流程定义中获取退回目标节点的node_id
+        return_to_node_id = f"UserTask_{return_to_node}"
+        if parsed_process:
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == return_to_node:
+                    return_to_node_id = node.id
+                    break
         
         # 创建退回目标节点的新任务
         new_task = WorkflowTask(
             task_key=return_to_node,
-            task_name=cls.PROCESS_NODES[return_to_node]["name"],
-            node_id=f"UserTask_{return_to_node}",
+            task_name=return_to_node_name,
+            node_id=return_to_node_id,
             assignee_id=assignee.id,
             status="待处理",
             workflow_instance_id=workflow.id,
@@ -556,15 +846,74 @@ class WorkflowEngine:
         db.commit()
     
     @classmethod
-    def _get_valid_return_nodes(cls, current_node: str) -> List[str]:
-        """获取当前节点可以退回的节点列表"""
-        return_nodes_map = {
-            "manager_identification": [],  # 客户经理不能退回
-            "branch_review": ["manager_identification"],  # 二级分行绿色金融管理岗可以退回到客户经理
-            "first_approval": ["manager_identification", "branch_review"],  # 一级分行绿色金融管理岗可以退回到客户经理或二级分行绿色金融管理岗
-            "final_review": ["manager_identification", "branch_review", "first_approval"]  # 一级分行绿色金融复核岗可以退回到客户经理、二级分行绿色金融管理岗或一级分行绿色金融管理岗
-        }
-        return return_nodes_map.get(current_node, [])
+    def _get_valid_return_nodes(cls, current_node: str, parsed_process: dict = None) -> List[str]:
+        """获取当前节点可以退回的节点列表
+        
+        从流程定义中动态获取可退回的节点。
+        默认规则：当前节点可以退回到所有前置的任务节点（除了客户经理节点）
+        """
+        valid_nodes = []
+        
+        if parsed_process:
+            # 从流程图中获取所有前置节点
+            nodes_map = {n.id: n for n in parsed_process['nodes']}
+            flow_graph = parsed_process['flow_graph']
+            
+            # 找到当前节点对应的 BPMN 节点
+            current_bpmn_node = None
+            for node in parsed_process['nodes']:
+                if node.type == 'task' and cls._map_node_name_to_task_key(node.name) == current_node:
+                    current_bpmn_node = node
+                    break
+            
+            if current_bpmn_node:
+                # 递归查找所有前置用户任务节点
+                visited = set()  # 防止循环
+                queue = [current_bpmn_node.id]
+                
+                print(f"DEBUG: 开始递归查找前置节点，起始节点: {current_bpmn_node.id}")
+                
+                while queue:
+                    node_id = queue.pop(0)
+                    if node_id in visited:
+                        print(f"DEBUG: 节点 {node_id} 已访问，跳过")
+                        continue
+                    visited.add(node_id)
+                    
+                    # 查找所有流向当前节点的节点
+                    for source_id, next_node_ids in flow_graph.items():
+                        if node_id in next_node_ids:
+                            predecessor = nodes_map.get(source_id)
+                            if predecessor:
+                                print(f"DEBUG: 找到前置节点 {source_id} (type={predecessor.type}, name={predecessor.name})")
+                                if predecessor.type == 'task':
+                                    task_key = cls._map_node_name_to_task_key(predecessor.name)
+                                    # 允许退回到所有前置任务节点（包括客户经理节点）
+                                    if task_key not in valid_nodes:
+                                        valid_nodes.append(task_key)
+                                        print(f"DEBUG: 添加到可退回节点列表: {predecessor.name} -> {task_key}")
+                                elif predecessor.type == 'gateway':
+                                    print(f"DEBUG: 遇到网关，继续向前查找")
+                                
+                                # 无论什么类型，都继续向前查找（除了开始节点）
+                                if predecessor.type != 'start' and predecessor.id not in visited:
+                                    queue.append(predecessor.id)
+                                    print(f"DEBUG: 继续向前查找: {predecessor.id}")
+                                elif predecessor.type == 'start':
+                                    print(f"DEBUG: 到达开始节点，停止查找")
+                
+                print(f"DEBUG: 最终找到的可退回节点: {valid_nodes}")
+        else:
+            # 后备逻辑：硬编码的退回规则
+            return_nodes_map = {
+                "manager_identification": [],  # 客户经理不能退回
+                "branch_review": ["manager_identification"],
+                "first_approval": ["manager_identification", "branch_review"],
+                "final_review": ["manager_identification", "branch_review", "first_approval"]
+            }
+            return return_nodes_map.get(current_node, [])
+        
+        return valid_nodes
 
 
 def get_user_tasks(db: Session, user: User, status: str) -> List[TaskListItem]:
@@ -591,6 +940,17 @@ def get_user_tasks(db: Session, user: User, status: str) -> List[TaskListItem]:
     query = query.order_by(WorkflowTask.started_at.desc())  # 按任务创建时间倒序排列
     
     tasks = query.all()
+    
+    # 对于已办任务，对identification_id进行去重，只保留最新的任务记录
+    if status == "已完成":
+        seen_identification_ids = set()
+        unique_tasks = []
+        for task in tasks:
+            identification_id = task[0].identification_id
+            if identification_id not in seen_identification_ids:
+                seen_identification_ids.add(identification_id)
+                unique_tasks.append(task)
+        tasks = unique_tasks
     
     items = []
     for task, identification, assignee in tasks:

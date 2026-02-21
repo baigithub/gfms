@@ -150,7 +150,7 @@
         </el-tab-pane>
         
         <el-tab-pane label="流程跟踪" name="flow">
-          <FlowChart :workflow-history="workflowHistory" />
+          <FlowChart :workflow-history="workflowHistory" :process-definition-id="processDefinitionId" />
         </el-tab-pane>
         
         <el-tab-pane label="绿色分类变动轨迹" name="category-trace">
@@ -284,7 +284,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UploadFilled, Document, SuccessFilled, Loading, Clock } from '@element-plus/icons-vue'
 import FlowChart from '@/components/FlowChart.vue'
-import { getTaskDetail, getWorkflowHistory, completeTask, withdrawTask, getGreenCategories, updateTaskCategory, saveTask, returnTask } from '@/api/green_finance'
+import { getTaskDetail, getWorkflowHistory, getWorkflowInstance, completeTask, withdrawTask, getGreenCategories, updateTaskCategory, saveTask, returnTask } from '@/api/green_finance'
 import { useAuthStore } from '@/store/auth'
 import { useTabsStore } from '@/store/tabs'
 import dayjs from 'dayjs'
@@ -298,6 +298,7 @@ const taskId = computed(() => route.params.id)
 
 const taskDetail = ref({})
 const workflowHistory = ref([])
+const processDefinitionId = ref(null)
 const components = {
   FlowChart
 }
@@ -591,8 +592,17 @@ const loadData = async () => {
     const history = await getWorkflowHistory(detail.id)
     workflowHistory.value = history
     
-    // 获取当前待处理任务
-    const currentTask = history.find(item => item.status === '待处理')
+    // 获取工作流实例信息（包含process_definition_id）
+    try {
+      const instance = await getWorkflowInstance(detail.id)
+      processDefinitionId.value = instance?.process_definition_id || null
+    } catch (error) {
+      console.warn('获取工作流实例失败:', error)
+      processDefinitionId.value = null
+    }
+    
+    // 获取当前待处理任务（包括暂存状态）
+    const currentTask = history.find(item => item.status === '待处理' || item.status === '暂存')
     
     // 设置当前待处理任务的ID（用于附件上传）
     if (currentTask) {

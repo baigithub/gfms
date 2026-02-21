@@ -118,6 +118,19 @@
         </el-table-column>
       </el-table>
       
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.page_size"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+          small
+        />
+      </div>
+
       <el-empty v-if="instances.length === 0" description="暂无流程实例" />
     </el-card>
     
@@ -215,6 +228,11 @@ import {
 } from '@/api/workflow'
 
 const instances = ref([])
+const pagination = ref({
+  page: 1,
+  page_size: 20,
+  total: 0
+})
 const tasks = ref([])
 const statusFilter = ref('')
 const workflowType = ref('green_finance')
@@ -223,7 +241,10 @@ const currentInstance = ref(null)
 
 const loadInstances = async () => {
   try {
-    const params = { page: 1, page_size: 100 }
+    const params = { 
+      page: pagination.value.page, 
+      page_size: pagination.value.page_size 
+    }
     if (statusFilter.value) {
       params.status = statusFilter.value
     }
@@ -234,6 +255,7 @@ const loadInstances = async () => {
       res = await getInstances(params)
     }
     instances.value = res.data || []
+    pagination.value.total = res.total || 0
   } catch (error) {
     console.error('Failed to load instances:', error)
     ElMessage.error('加载实例列表失败')
@@ -281,6 +303,17 @@ const handleDelete = async (instance) => {
       ElMessage.error('流程实例删除失败')
     }
   }
+}
+
+const handlePageChange = (page) => {
+  pagination.value.page = page
+  loadInstances()
+}
+
+const handleSizeChange = (size) => {
+  pagination.value.page_size = size
+  pagination.value.page = 1
+  loadInstances()
 }
 
 const getStatusType = (status) => {
@@ -623,5 +656,11 @@ onMounted(() => {
 
 :deep(.el-loading-spinner .path) {
   stroke: #667eea;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 0 0 0;
 }
 </style>

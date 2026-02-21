@@ -103,6 +103,7 @@ async def get_definitions(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     status: Optional[str] = None,
+    name: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -111,6 +112,9 @@ async def get_definitions(
     
     if status:
         query = query.filter(ProcessDefinition.status == status)
+    
+    if name:
+        query = query.filter(ProcessDefinition.name == name)
     
     total = query.count()
     offset = (page - 1) * page_size

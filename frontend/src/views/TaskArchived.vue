@@ -295,7 +295,7 @@
           </el-tab-pane>
           
           <el-tab-pane label="流程跟踪" name="flow">
-            <FlowChart :workflow-history="workflowHistory" />
+            <FlowChart :workflow-history="workflowHistory" :process-definition-id="processDefinitionId" />
           </el-tab-pane>
           
           <el-tab-pane label="附件列表" name="attachments">
@@ -394,7 +394,7 @@ import {
   Download
 } from '@element-plus/icons-vue'
 import FlowChart from '@/components/FlowChart.vue'
-import { getArchivedTasks, getTaskDetail, getWorkflowHistory } from '@/api/green_finance'
+import { getArchivedTasks, getTaskDetail, getWorkflowHistory, getWorkflowInstance } from '@/api/green_finance'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/store/auth'
 
@@ -425,6 +425,7 @@ const workflowHistory = ref([])
 const components = {
   FlowChart
 }
+const processDefinitionId = ref(null)
 
 const formatAmount = (value) => {
   if (!value) return '0.00'
@@ -632,6 +633,16 @@ const handleView = async (row) => {
     ])
     currentTask.value = detail
     workflowHistory.value = history
+    
+    // 获取工作流实例信息（包含process_definition_id）
+    try {
+      const instance = await getWorkflowInstance(row.identification_id)
+      processDefinitionId.value = instance?.process_definition_id || null
+    } catch (error) {
+      console.warn('获取工作流实例失败:', error)
+      processDefinitionId.value = null
+    }
+    
     dialogVisible.value = true
     activeTab.value = 'business'
   } catch (error) {

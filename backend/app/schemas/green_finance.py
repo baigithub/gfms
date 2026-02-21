@@ -132,6 +132,7 @@ class WorkflowInstance(BaseModel):
     id: int
     case_id: str
     process_key: str
+    process_definition_id: Optional[int] = None
     business_key: str
     current_node: str
     status: str

@@ -1134,21 +1134,19 @@ onMounted(() => {
 }
 
 :deep(.modern-table thead) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%) !important;
   display: table-header-group !important;
   visibility: visible !important;
 }
 
 :deep(.modern-table th) {
   background: transparent !important;
-  color: white !important;
+  color: #303133 !important;
   font-weight: 600;
   font-size: 14px;
-  padding: 20px 18px;
+  padding: 16px 12px;
   display: table-cell !important;
   visibility: visible !important;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 
 :deep(.modern-table th .cell) {

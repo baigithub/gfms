@@ -67,6 +67,7 @@ class WorkflowInstance(Base):
     id = Column(Integer, primary_key=True, index=True)
     case_id = Column(String(50), unique=True, index=True)
     process_key = Column(String(50), default="green_identification_process")
+    process_definition_id = Column(Integer, ForeignKey("process_definitions.id"), nullable=True, comment="流程定义ID，用于关联BPMN流程版本")
     business_key = Column(String(50))  # loan_code
     current_node = Column(String(50))
     status = Column(String(20))
@@ -78,6 +79,7 @@ class WorkflowInstance(Base):
     identification = relationship("GreenIdentification", foreign_keys=[identification_id])
     identification = relationship("GreenIdentification", back_populates="workflow_instances")
     tasks = relationship("WorkflowTask", back_populates="workflow_instance")
+    process_definition = relationship("ProcessDefinition", foreign_keys=[process_definition_id])
 
 
 class WorkflowTask(Base):

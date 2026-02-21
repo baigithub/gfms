@@ -1,0 +1,33 @@
+@classmethod
+    def complete_task(cls, db: Session, task: WorkflowTask, approval_result: str, comment: Optional[str] = None, reason: Optional[str] = None) -> Optional[WorkflowTask]:
+        """完成任务并流转到下一节点"""
+        # 获取流程定义
+        workflow_instance = task.workflow_instance
+        process_definition = None
+        parsed_process = None
+        
+        # 如果workflow_instance没有绑定流程定义，动态获取启用状态的流程定义
+        if hasattr(workflow_instance, 'process_definition_id') and not workflow_instance.process_definition_id:
+            # 动态获取启用状态的流程定义
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.name == "绿色认定",
+                ProcessDefinition.status == "active"
+            ).first()
+            
+            if process_definition:
+                # 绑定流程定义到工作流实例
+                workflow_instance.process_definition_id = process_definition.id
+                db.commit()
+                print(f"已绑定流程版本v{process_definition.version}到工作流实例 {workflow_instance.id}")
+        # 检查是否有process_definition_id字段（兼容旧系统）
+        elif hasattr(workflow_instance, 'process_definition_id') and workflow_instance.process_definition_id:
+            process_definition = db.query(ProcessDefinition).filter(
+                ProcessDefinition.id == workflow_instance.process_definition_id
+            ).first()
+        
+        if process_definition:
+            try:
+                parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+            except Exception as e:
+                print(f"警告: 解析流程定义失败，使用硬编码节点: {str(e)}")
+                parsed_process = None

@@ -1,0 +1,32 @@
+
+> gfms-frontend@1.0.0 dev
+> vite
+
+
+  VITE v5.4.21  ready in 350 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+00:16:47 [vite] hmr update /src/components/FlowChart.vue
+00:43:14 [vite] hmr update /src/components/FlowChart.vue
+10:03:36 [vite] hmr update /src/components/FlowChart.vue
+10:05:10 [vite] hmr update /src/components/FlowChart.vue
+10:05:35 [vite] hmr update /src/views/TaskDetail.vue
+10:05:42 [vite] hmr update /src/views/TaskDetail.vue
+10:05:48 [vite] hmr update /src/views/TaskDetail.vue
+10:05:51 [vite] hmr update /src/views/TaskDetail.vue
+10:05:54 [vite] hmr update /src/components/FlowChart.vue
+10:06:05 [vite] hmr update /src/views/TaskCompleted.vue
+10:06:12 [vite] hmr update /src/views/TaskCompleted.vue
+10:06:18 [vite] hmr update /src/views/TaskCompleted.vue
+10:06:22 [vite] hmr update /src/views/TaskCompleted.vue
+10:06:32 [vite] hmr update /src/views/TaskArchived.vue
+10:06:37 [vite] hmr update /src/views/TaskArchived.vue
+10:06:49 [vite] hmr update /src/views/TaskArchived.vue
+10:06:53 [vite] hmr update /src/views/TaskArchived.vue
+10:16:13 [vite] hmr update /src/components/FlowChart.vue
+10:16:25 [vite] hmr update /src/components/FlowChart.vue
+10:18:39 [vite] hmr update /src/components/FlowChart.vue
+10:19:31 [vite] hmr update /src/components/FlowChart.vue
+10:21:10 [vite] hmr update /src/views/TaskDetail.vue
+10:31:53 [vite] hmr update /src/components/FlowChart.vue

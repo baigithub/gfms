@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { CircleCheckFilled, Clock, User, Position } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 
@@ -114,32 +114,175 @@ const props = defineProps({
   workflowHistory: {
     type: Array,
     default: () => []
+  },
+  processDefinitionId: {
+    type: [Number, null],
+    default: null
   }
 })
 
 const nodeHistoryDialogVisible = ref(false)
 const currentNodeHistory = ref([])
+const activeProcessDefinition = ref(null) // 当前启用的流程定义
+
+// 根据流程定义ID或工作流历史生成流程步骤定义
+const getFlowStepDefinitions = () => {
+  // 如果有工作流历史且已绑定流程版本，从历史中提取节点
+  if (props.workflowHistory && props.workflowHistory.length > 0 && props.processDefinitionId) {
+    const taskKeys = new Set()
+    const taskNames = {}
+    
+    props.workflowHistory.forEach(item => {
+      if (item.task_key && item.task_name) {
+        taskKeys.add(item.task_key)
+        taskNames[item.task_key] = item.task_name
+      }
+    })
+    
+    const flowStepDefinitions = [
+      { title: '开始', description: '客户经理发起认定', code: 'start' }
+    ]
+    
+    const sortedTaskKeys = Array.from(taskKeys).sort((a, b) => {
+      const aItem = props.workflowHistory.find(i => i.task_key === a)
+      const bItem = props.workflowHistory.find(i => i.task_key === b)
+      return (aItem?.started_at || 0) - (bItem?.started_at || 0)
+    })
+    
+    sortedTaskKeys.forEach(taskKey => {
+      flowStepDefinitions.push({
+        title: taskNames[taskKey] || taskKey,
+        description: taskNames[taskKey] || taskKey,
+        code: taskKey
+      })
+    })
+    
+    flowStepDefinitions.push({
+      title: '结束',
+      description: '流程完成',
+      code: 'end'
+    })
+    
+    return flowStepDefinitions
+  } else {
+    // 没有工作流历史或未绑定流程版本，显示当前启用版本的流程节点
+    // 如果有activeProcessDefinition，使用它；否则使用默认的v5流程节点
+    if (activeProcessDefinition.value && activeProcessDefinition.value.nodes) {
+      const flowStepDefinitions = [
+        { title: '开始', description: '客户经理发起认定', code: 'start' }
+      ]
+      
+      // 按照流程定义中的顺序添加任务节点
+      activeProcessDefinition.value.nodes.forEach(node => {
+        if (node.type === 'task') {
+          flowStepDefinitions.push({
+            title: node.name,
+            description: node.name,
+            code: node.task_key || node.name
+          })
+        }
+      })
+      
+      flowStepDefinitions.push({
+        title: '结束',
+        description: '流程完成',
+        code: 'end'
+      })
+      
+      return flowStepDefinitions
+    } else {
+      // 默认v5流程节点（向后兼容）
+      return [
+        { title: '开始', description: '客户经理发起认定', code: 'start' },
+        { title: '客户经理提交', description: '填写认定信息', code: 'manager_identification' },
+        { title: '二级分行认定', description: '二级分行绿色金融管理部门审核', code: 'branch_review' },
+        { title: '一级分行认定', description: '一级分行审批', code: 'first_approval' },
+        { title: '一级分行复核', description: '最终复核', code: 'final_review' },
+        { title: '结束', description: '流程完成', code: 'end' }
+      ]
+    }
+  }
+}
+
+// 获取当前启用的流程定义
+const fetchActiveProcessDefinition = async () => {
+  try {
+    // 从localStorage获取token
+    const token = localStorage.getItem('token')
+    const headers = {
+      'Content-Type': 'application/json'
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    
+    const response = await fetch('/api/workflow/definitions?name=绿色认定&status=active&page=1&page_size=1', {
+      headers: headers
+    })
+    
+    if (!response.ok) {
+      console.warn('获取流程定义失败:', response.status, response.statusText)
+      return
+    }
+    
+    const data = await response.json()
+    if (data && data.length > 0) {
+      const activeDef = data[0]
+      // 解析BPMN XML获取节点信息
+      if (activeDef.bpmn_xml) {
+        const parser = new DOMParser()
+        const xmlDoc = parser.parseFromString(activeDef.bpmn_xml, 'text/xml')
+        const nodes = []
+        
+        // 提取用户任务节点（使用通配符命名空间）
+        const userTasks = xmlDoc.getElementsByTagNameNS('*', 'userTask')
+        console.log('找到userTask节点数量:', userTasks.length)
+        
+        for (let i = 0; i < userTasks.length; i++) {
+          const task = userTasks[i]
+          const taskName = task.getAttribute('name') || task.getAttribute('id')
+          const taskId = task.getAttribute('id')
+          console.log(`节点${i}: id=${taskId}, name=${taskName}`)
+          nodes.push({
+            id: taskId,
+            name: taskName,
+            type: 'task',
+            task_key: taskId
+          })
+        }
+        
+        activeProcessDefinition.value = {
+          id: activeDef.id,
+          version: activeDef.version,
+          name: activeDef.name,
+          nodes: nodes
+        }
+        console.log('获取到当前启用流程定义:', activeProcessDefinition.value)
+      }
+    }
+  } catch (error) {
+    console.warn('获取当前启用流程定义失败:', error)
+  }
+}
+
+// 组件挂载时获取当前启用的流程定义
+onMounted(() => {
+  if (!props.processDefinitionId) {
+    fetchActiveProcessDefinition()
+  }
+})
 
 const flowSteps = computed(() => {
-  if (!props.workflowHistory || props.workflowHistory.length === 0) {
+  if (!props.workflowHistory && !props.processDefinitionId && !activeProcessDefinition.value) {
     return []
   }
 
-  // 定义固定的流程节点顺序
-  const flowStepDefinitions = [
-    { title: '开始', description: '客户经理发起认定', code: 'start' },
-    { title: '客户经理认定', description: '填写认定信息', code: 'manager_identification' },
-    { title: '二级分行绿色金融管理岗', description: '绿色金融管理部门审核', code: 'branch_review' },
-    { title: '一级分行绿色金融管理岗', description: '一级分行审批', code: 'first_approval' },
-    { title: '一级分行绿色金融复核岗', description: '最终复核', code: 'final_review' },
-    { title: '结束', description: '流程完成', code: 'end' }
-  ]
-
+  const flowStepDefinitions = getFlowStepDefinitions()
   const steps = []
 
   flowStepDefinitions.forEach(stepDef => {
     // 查找对应的工作流历史记录
-    const historyItem = props.workflowHistory.find(item => item.task_key === stepDef.code)
+    const historyItem = props.workflowHistory?.find(item => item.task_key === stepDef.code)
     
     let status = 'wait'
     if (stepDef.code === 'start') {
@@ -148,13 +291,13 @@ const flowSteps = computed(() => {
       // 结束节点的状态：检查实际经过的节点是否都完成了
       // 只检查有历史记录的节点（跳过的节点不检查）
       const nodesWithHistory = steps.filter(s => s.code !== 'start' && s.code !== 'end' && 
-        props.workflowHistory.some(item => item.task_key === s.code))
+        props.workflowHistory?.some(item => item.task_key === s.code))
       const allFinishedNodes = nodesWithHistory.every(s => s.status === 'finish')
       // 如果有实际经过的节点且都完成了，则结束节点也完成
       status = nodesWithHistory.length > 0 && allFinishedNodes ? 'finish' : 'wait'
     } else if (historyItem) {
       // 检查该节点是否有已完成记录
-      const nodeHistoryItems = props.workflowHistory.filter(item => item.task_key === stepDef.code)
+      const nodeHistoryItems = props.workflowHistory?.filter(item => item.task_key === stepDef.code)
       const hasCompleted = nodeHistoryItems.some(item => item.status === '已完成')
       // 只有当节点有已完成记录时，才显示为完成状态
       // 如果只有暂存或待处理记录，则显示为等待状态

@@ -179,7 +179,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="流程跟踪" name="flow">
-          <FlowChart :workflow-history="workflowHistory" />
+          <FlowChart :workflow-history="workflowHistory" :process-definition-id="processDefinitionId" />
         </el-tab-pane>
 
         <el-tab-pane label="附件列表" name="attachments">
@@ -268,7 +268,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { CircleCheckFilled, View, User, Position, Document, UserFilled, FolderOpened, Folder, Clock, RefreshLeft } from '@element-plus/icons-vue'
 import FlowChart from '@/components/FlowChart.vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getCompletedTasks, getTaskDetail, getWorkflowHistory, withdrawTask } from '@/api/green_finance'
+import { getCompletedTasks, getTaskDetail, getWorkflowHistory, getWorkflowInstance, withdrawTask } from '@/api/green_finance'
 import dayjs from 'dayjs'
 import { useAuthStore } from '@/store/auth'
 
@@ -287,6 +287,7 @@ const dialogVisible = ref(false)
 const activeTab = ref('business')
 const currentTask = ref({})
 const workflowHistory = ref([])
+const processDefinitionId = ref(null)
 const nodeHistoryDialogVisible = ref(false)
 const currentNodeHistory = ref([])
 const components = {
@@ -513,6 +514,16 @@ const handleView = async (row) => {
     console.log('history:', history)
     currentTask.value = detail
     workflowHistory.value = history
+    
+    // 获取工作流实例信息（包含process_definition_id）
+    try {
+      const instance = await getWorkflowInstance(row.identification_id)
+      processDefinitionId.value = instance?.process_definition_id || null
+    } catch (error) {
+      console.warn('获取工作流实例失败:', error)
+      processDefinitionId.value = null
+    }
+    
     console.log('currentTask.value after assignment:', currentTask.value)
     console.log('currentTask.value.attachments after assignment:', currentTask.value.attachments)
     dialogVisible.value = true

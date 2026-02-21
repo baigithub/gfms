@@ -8,6 +8,7 @@ from decimal import Decimal
 from app.database import get_db
 from app.models.user import User
 from app.models.green_finance import GreenIdentification, WorkflowTask, WorkflowInstance, GreenLoanIndicator, TaskStatus
+from app.models.workflow import ProcessDefinition
 from app.schemas.green_finance import (
     GreenIdentificationCreate,
     GreenIdentificationUpdate,
@@ -26,6 +27,14 @@ from app.services.auth import get_current_user
 from app.services.workflow import WorkflowEngine, get_user_tasks, query_tasks, get_formatted_category
 
 router = APIRouter(prefix="/api", tags=["绿色金融"])
+
+
+def get_workflow_version(db: Session, process_definition_id: Optional[int]) -> int:
+    """获取流程定义版本"""
+    if not process_definition_id:
+        return 1
+    process_def = db.query(ProcessDefinition).filter(ProcessDefinition.id == process_definition_id).first()
+    return process_def.version if process_def else 1
 
 
 @router.get("/dashboard", response_model=DashboardData)
@@ -68,6 +77,10 @@ async def get_dashboard(
     
     # 统计各类型待办任务
     from app.models.green_finance import WorkflowTask as WorkflowTaskModel
+    from app.models.workflow import ProcessDefinition
+    from app.services.workflow import WorkflowEngine
+    from app.services.bpmn_parser import BPMNParser
+    
     pending_tasks = db.query(WorkflowTaskModel).filter(
         WorkflowTaskModel.status == "待处理",
         WorkflowTaskModel.assignee_id == current_user.id
@@ -79,13 +92,24 @@ async def get_dashboard(
         task_key = task.task_key
         task_counts[task_key] = task_counts.get(task_key, 0) + 1
     
-    # 映射任务类型到中文名称
-    task_name_map = {
-        "manager_identification": "客户经理认定",
-        "branch_review": "二级分行绿色金融管理岗",
-        "first_approval": "一级分行绿色金融管理岗",
-        "final_review": "绿色金融复核岗"
-    }
+    # 从流程定义中动态获取节点名称
+    task_name_map = {}
+    
+    # 获取启用状态的流程定义
+    process_definition = db.query(ProcessDefinition).filter(
+        ProcessDefinition.name == "绿色认定",
+        ProcessDefinition.status == "active"
+    ).first()
+    
+    if process_definition and process_definition.bpmn_xml:
+        try:
+            parsed_process = BPMNParser.parse(process_definition.bpmn_xml)
+            for node in parsed_process['nodes']:
+                if node.type == 'task':
+                    task_key = WorkflowEngine._map_node_name_to_task_key(node.name)
+                    task_name_map[task_key] = node.name
+        except Exception as e:
+            print(f"解析流程定义失败: {str(e)}")
     
     for task_key, count in task_counts.items():
         todos.append(TodoItem(
@@ -1107,13 +1131,20 @@ async def get_workflow_history(
 
 @router.get("/identifications/{id}/workflow-instance", response_model=WorkflowInstanceSchema)
 async def get_workflow_instance(
-    id: int,
+    id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """获取工作流实例"""
+    # 处理带前缀的ID，格式：ID-{identification_id}
+    if id.startswith("ID-"):
+        identification_id = int(id.split("-")[1])
+    else:
+        # 兼容旧格式，直接作为数字ID处理
+        identification_id = int(id)
+    
     workflow = db.query(WorkflowInstance).filter(
-        WorkflowInstance.identification_id == id
+        WorkflowInstance.identification_id == identification_id
     ).first()
     
     if not workflow:
@@ -1170,10 +1201,10 @@ async def get_workflow_instances(
             "customer_name": identification.customer_name,
             "loan_account": identification.loan_account,
             "definition": {
-                "id": None,
+                "id": instance.process_definition_id,
                 "key": instance.process_key,
                 "name": "绿色认定流程",
-                "version": 4  # 修复流程版本
+                "version": get_workflow_version(db, instance.process_definition_id)
             }
         })
     
