@@ -1,1 +1,0 @@
-import{_ as o,o as t,c as s,b as c,r}from"./index-DDrUN6p6.js";const a={},n={class:"system-page"};function _(d,m){const e=r("router-view");return t(),s("div",n,[c(e)])}const i=o(a,[["render",_],["__scopeId","data-v-2aa314ce"]]);export{i as default};

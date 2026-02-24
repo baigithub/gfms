@@ -9,6 +9,8 @@ class UserBase(BaseModel):
     employee_id: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    wechat_openid: Optional[str] = None
+    wechat_unionid: Optional[str] = None
     role_id: Optional[int] = None
     org_id: Optional[int] = None
     
@@ -25,6 +27,8 @@ class UserUpdate(BaseModel):
     real_name: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    wechat_openid: Optional[str] = None
+    wechat_unionid: Optional[str] = None
     role_id: Optional[int] = None
     org_id: Optional[int] = None
     is_active: Optional[bool] = None

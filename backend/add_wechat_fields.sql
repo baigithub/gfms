@@ -1,0 +1,4 @@
+-- 添加微信相关字段到users表
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS openid VARCHAR(255) NULL COMMENT '微信OpenID' AFTER phone,
+ADD COLUMN IF NOT EXISTS unionid VARCHAR(255) NULL COMMENT '微信UnionID' AFTER openid;

@@ -90,6 +90,10 @@ async def update_user(
         user.email = user_data.email
     if user_data.phone is not None:
         user.phone = user_data.phone
+    if user_data.wechat_openid is not None:
+        user.wechat_openid = user_data.wechat_openid
+    if user_data.wechat_unionid is not None:
+        user.wechat_unionid = user_data.wechat_unionid
     if user_data.role_id is not None:
         user.role_id = user_data.role_id
     if user_data.org_id is not None:

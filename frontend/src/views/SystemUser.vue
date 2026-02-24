@@ -18,6 +18,8 @@
         <el-table-column prop="employee_id" label="工号" width="120" />
         <el-table-column prop="email" label="邮箱" min-width="150" />
         <el-table-column prop="phone" label="电话" width="120" />
+        <el-table-column prop="wechat_openid" label="微信OpenID" width="180" />
+        <el-table-column prop="wechat_unionid" label="微信UnionID" width="180" />
         <el-table-column prop="org_id" label="所属机构" width="150">
           <template #default="{ row }">
             {{ getOrgName(row.org_id) }}
@@ -78,6 +80,12 @@
         </el-form-item>
         <el-form-item label="电话" prop="phone">
           <el-input v-model="userForm.phone" />
+        </el-form-item>
+        <el-form-item label="微信OpenID" prop="wechat_openid">
+          <el-input v-model="userForm.wechat_openid" placeholder="请输入微信OpenID" />
+        </el-form-item>
+        <el-form-item label="微信UnionID" prop="wechat_unionid">
+          <el-input v-model="userForm.wechat_unionid" placeholder="请输入微信UnionID" />
         </el-form-item>
         <el-form-item label="角色" prop="role_id">
           <el-select v-model="userForm.role_id" placeholder="请选择角色" style="width: 100%">
@@ -143,6 +151,8 @@ const userForm = reactive({
   employee_id: '',
   email: '',
   phone: '',
+  wechat_openid: '',
+  wechat_unionid: '',
   role_id: null,
   org_id: null,
   is_active: true
@@ -207,6 +217,8 @@ const handleAdd = () => {
     employee_id: '',
     email: '',
     phone: '',
+    wechat_openid: '',
+    wechat_unionid: '',
     role_id: null,
     org_id: null,
     is_active: true
@@ -224,7 +236,10 @@ const handleEdit = (row) => {
     employee_id: row.employee_id,
     email: row.email,
     phone: row.phone,
+    wechat_openid: row.wechat_openid || '',
+    wechat_unionid: row.wechat_unionid || '',
     role_id: row.role_id,
+    org_id: row.org_id,
     is_active: row.is_active
   })
   dialogVisible.value = true

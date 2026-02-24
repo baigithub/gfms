@@ -243,6 +243,7 @@ const greenIdentifyMenus = computed(() => {
 const systemMenus = computed(() => {
   const menus = [
     { path: '/system/user', label: '用户管理', permission: 'system-user' },
+    { path: '/system/announcement', label: '公告管理', permission: 'system-announcement' },
     { path: '/system/role', label: '角色管理', permission: 'system-role' },
     { path: '/system/org', label: '机构管理', permission: 'system-org' }
   ]

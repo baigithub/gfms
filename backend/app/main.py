@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from app.config import settings
 from app.database import engine, Base
-from app.routers import auth, green_finance, system, workflow, workflow_variables, files, log
+from app.routers import auth, green_finance, system, workflow, workflow_variables, files, log, announcement
 from app.scheduler import start_scheduler, stop_scheduler
 import atexit
 import logging
+import os
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +19,7 @@ import app.models.workflow
 import app.models.workflow_variable
 import app.models.green_finance
 import app.models.log
+import app.models.announcement
 
 # 创建数据库表
 Base.metadata.create_all(bind=engine)
@@ -53,6 +56,11 @@ app.include_router(workflow.router)
 app.include_router(workflow_variables.router)
 app.include_router(files.router)
 app.include_router(log.router)
+app.include_router(announcement.router)
+
+# 挂载静态文件目录
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 @app.get("/")

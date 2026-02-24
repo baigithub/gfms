@@ -3,487 +3,320 @@
 > vite
 
 
-  VITE v5.4.21  ready in 205 ms
+  VITE v5.4.21  ready in 376 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-22:34:44 [vite] page reload src/main.js
-22:34:45 [vite] ✨ new dependencies optimized: axios
-22:34:45 [vite] ✨ optimized dependencies changed. reloading
-22:35:01 [vite] ✨ new dependencies optimized: dayjs
-22:35:01 [vite] ✨ optimized dependencies changed. reloading
-22:36:44 [vite] hmr update /src/views/TaskCompleted.vue, /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-22:41:27 [vite] hmr update /src/views/TaskCompleted.vue, /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-22:43:53 [vite] hmr update /src/views/TaskCompleted.vue, /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-22:45:40 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-22:47:47 [vite] hmr update /src/views/TaskCompleted.vue, /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-22:50:27 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css, /src/views/TaskCompleted.vue
-22:53:45 [vite] hmr update /src/views/Layout.vue, /src/views/Layout.vue?vue&type=style&index=0&scoped=60489549&lang.css
-22:54:31 [vite] hmr update /src/views/Dashboard.vue, /src/views/Dashboard.vue?vue&type=style&index=0&scoped=7f773d42&lang.css
-22:55:05 [vite] hmr update /src/views/TaskPending.vue, /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-22:56:11 [vite] hmr update /src/views/TaskQuery.vue, /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-22:57:33 [vite] hmr update /src/views/TaskArchived.vue, /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-23:01:33 [vite] hmr update /src/views/TaskCompleted.vue
-23:08:43 [vite] hmr update /src/views/TaskCompleted.vue
-23:08:47 [vite] hmr update /src/views/TaskCompleted.vue
-23:09:00 [vite] hmr update /src/views/TaskCompleted.vue
-23:09:06 [vite] hmr update /src/views/TaskCompleted.vue
-23:09:18 [vite] hmr update /src/views/TaskCompleted.vue
-23:09:28 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-23:09:38 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-23:12:37 [vite] hmr update /src/views/TaskArchived.vue
-23:12:41 [vite] hmr update /src/views/TaskArchived.vue
-23:12:44 [vite] hmr update /src/views/TaskArchived.vue
-23:13:11 [vite] hmr update /src/views/TaskCompleted.vue
-23:13:17 [vite] hmr update /src/views/TaskCompleted.vue
-23:13:26 [vite] hmr update /src/views/TaskCompleted.vue
-23:13:36 [vite] hmr update /src/views/TaskCompleted.vue
-23:14:00 [vite] hmr update /src/views/TaskCompleted.vue
-23:14:47 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-23:15:10 [vite] hmr update /src/components/FlowChart.vue
-23:15:15 [vite] hmr update /src/components/FlowChart.vue
-23:15:34 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:15:38 [vite] hmr update /src/components/FlowChart.vue
-23:16:03 [vite] hmr update /src/components/FlowChart.vue
-23:16:13 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:16:19 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:16:25 [vite] hmr update /src/components/FlowChart.vue
-23:16:36 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:18:45 [vite] hmr update /src/components/FlowChart.vue
-23:21:27 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:21:33 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:21:33 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
+23:19:11 [vite] hmr update /src/views/Dashboard.vue
+23:19:11 [vite] Internal server error: Element is missing end tag.
   Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:21:58 [vite] Pre-transform error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-23:21:58 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:21:58 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:22:00 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:22:00 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:22:00 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:126:1: Unexpected }
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/components/FlowChart.vue:357:1
-  356|  }
-  357|  
-  358|  .flow-node.node-clickable {
-     |  ^
-  359|    cursor: pointer;
-  360|  }
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-23:22:23 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:24:16 [vite] hmr update /src/components/FlowChart.vue
-23:24:29 [vite] hmr update /src/components/FlowChart.vue
-23:27:06 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:27:16 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:27:22 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:29:24 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-23:29:30 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-23:30:24 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:30:30 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:30:37 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:33:21 [vite] hmr update /src/components/FlowChart.vue
-23:33:30 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:33:41 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:36:30 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:46:26 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:49:06 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:49:12 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:50:54 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:52:03 [vite] hmr update /src/components/FlowChart.vue
-23:52:31 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:53:23 [vite] hmr update /src/components/FlowChart.vue
-23:54:46 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:54:55 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:54:59 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:55:05 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:56:30 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:56:36 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:56:46 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:58:52 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:58:59 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-23:59:05 [vite] hmr update /src/components/FlowChart.vue
-23:59:12 [vite] hmr update /src/components/FlowChart.vue
-23:59:26 [vite] hmr update /src/components/FlowChart.vue
-23:59:39 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:00:00 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:01:13 [vite] hmr update /src/components/FlowChart.vue
-00:01:22 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:01:29 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:03:02 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:04:41 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:04:55 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:04:57 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:05:00 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:05:46 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:06:55 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:06:58 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:07:05 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:07:31 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:08:17 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:08:22 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:08:58 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:10:46 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:10:49 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:10:52 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:10:56 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:11:02 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:11:05 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:11:56 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:12:00 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:12:04 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:13:31 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:13:37 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:13:54 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:13:58 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:14:04 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:14:08 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:14:24 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:15:10 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:15:35 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:16:14 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:17:13 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:17:35 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:18:33 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:19:12 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:19:42 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:20:08 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:20:55 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:21:36 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:22:02 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:22:35 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:23:04 [vite] hmr update /src/components/FlowChart.vue
-00:23:37 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:25:41 [vite] hmr update /src/components/FlowChart.vue
-00:25:52 [vite] hmr update /src/components/FlowChart.vue
-00:25:56 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-00:26:57 [vite] hmr update /src/components/FlowChart.vue?vue&type=style&index=0&scoped=fe41ce20&lang.css
-09:13:39 [vite] hmr update /src/views/Layout.vue?vue&type=style&index=0&scoped=60489549&lang.css
-09:17:01 [vite] hmr update /src/views/TaskDetail.vue
-09:23:26 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:23:29 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:23:31 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:24:52 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:25:39 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:25:41 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:25:45 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:25:48 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:25:50 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-09:27:51 [vite] Internal server error: [vue/compiler-sfc] Unexpected token (20:0)
-
-/Users/bryant/workbench/gfms/frontend/src/views/TaskArchived.vue
-390|    ChatDotRound,
-391|    Warning,
-392|    Download
-   |             ^
-393|  } from '@element-plus/icons-vue'
-   |  ^
-394|  import { getArchivedTasks, getTaskDetail, getWorkflowHistory } from '@/api/green_finance'
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/views/TaskArchived.vue:20:0
-  7  |              <el-icon class="header-icon" color="#667eea"><DocumentChecked /></el-icon>
-  8  |              <span class="card-title">办结任务</span>
-  9  |              <el-tag type="success" size="small">{{ pagination.total }} 条记录</el-tag>
-     |                                                             ^
-  10 |            </div>
-  11 |            <div class="header-right">
-      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
-      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
-      at Parser.unexpected (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6619:16)
-      at Parser.parseExprAtom (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11442:22)
-      at Parser.parseExprSubscripts (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11081:23)
-      at Parser.parseUpdate (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11066:21)
-      at Parser.parseMaybeUnary (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11046:23)
-      at Parser.parseMaybeUnaryOrPrivate (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10899:61)
-      at Parser.parseExprOps (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10904:23)
-      at Parser.parseMaybeConditional (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10881:23)
-09:33:15 [vite] hmr update /src/views/TaskDetail.vue
-09:41:12 [vite] hmr update /src/views/TaskDetail.vue
-09:44:40 [vite] Internal server error: [vue/compiler-sfc] Unexpected token (20:0)
-
-/Users/bryant/workbench/gfms/frontend/src/views/TaskArchived.vue
-390|    ChatDotRound,
-391|    Warning,
-392|    Download
-   |             ^
-393|  } from '@element-plus/icons-vue'
-   |  ^
-394|  import { getArchivedTasks, getTaskDetail, getWorkflowHistory } from '@/api/green_finance'
-  Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/views/TaskArchived.vue:20:0
-  7  |              <el-icon class="header-icon" color="#667eea"><DocumentChecked /></el-icon>
-  8  |              <span class="card-title">办结任务</span>
-  9  |              <el-tag type="success" size="small">{{ pagination.total }} 条记录</el-tag>
-     |                                                             ^
-  10 |            </div>
-  11 |            <div class="header-right">
-      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
-      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
-      at Parser.unexpected (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6619:16)
-      at Parser.parseExprAtom (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11442:22)
-      at Parser.parseExprSubscripts (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11081:23)
-      at Parser.parseUpdate (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11066:21)
-      at Parser.parseMaybeUnary (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:11046:23)
-      at Parser.parseMaybeUnaryOrPrivate (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10899:61)
-      at Parser.parseExprOps (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10904:23)
-      at Parser.parseMaybeConditional (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:10881:23)
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:115:7
+  113|      <!-- 待办事项 -->
+  114|      <el-card shadow="never" class="todo-card">
+  115|        <template #header>
+     |         ^
+  116|          <div class="card-header">
+  117|            <div class="header-left">
+      at createCompilerError (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1378:17)
+      at emitError (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3014:5)
+      at Object.onclosetag (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:2381:13)
+      at Tokenizer.stateInClosingTagName (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:799:16)
+      at Tokenizer.parse (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:1157:16)
+      at Object.baseParse (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js:3053:13)
+      at Object.parse (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-dom/dist/compiler-dom.cjs.js:910:23)
+      at Object.parse$1 [as parse] (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:1824:24)
+      at createDescriptor (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:74:43)
+      at handleHotUpdate (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2155:26)
 Vim: Warning: Output is not to a terminal
 Vim: Warning: Input is not from a terminal
-[?1049h[>4;2m[?1h=[?2004h[?1004h[1;24r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?2004l[>4;m[?2004h[>4;2m[?25l[24;1H"~/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js"[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m<s/frontend/node_modules/@babel/parser/lib/index.js" 14582L, 512056B[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m]11;?]10;?[1;1H'use strict';
+Vim: Warning: Output is not to a terminal
+Vim: Warning: Input is not from a terminal
+[?1049h[>4;2m[?1h=[?2004h[?1004h[1;24r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?2004l[>4;m[?2004h[>4;2m[?25l[24;1H<rontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js"[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m<odules/@vue/compiler-core/dist/compiler-core.cjs.js" 6888L, 205260B[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m]11;?]10;?[1;1H/**
+* @vue/compiler-core v3.5.27
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+'use strict';
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-function _objectWithoutPropertiesLoose(r, e) {
-  if (null == r) return {};
-  var t = {};
-  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
-    if (-1 !== e.indexOf(n)) continue;
-    t[n] = r[n];
-  }
-  return t;
-}
-class Position {
-  constructor(line, col, index) {
-    this.line = void 0;
-    this.column = void 0;
-    this.index = void 0;
-    this.line = line;
-    this.column = col;
-    this.index = index;
-  }[1;1H[?25h[?4m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[24;1H[?2004l[>4;m[?1004l[?2004l[?1l>[?1049l[>4;mVim: Error reading input, exiting...
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var shared = require('@vue/shared');
+var decode = require('entities/decode');
+var parser = require('@babel/parser');
+var estreeWalker = require('estree-walker');
+var sourceMapJs = require('source-map-js');
+
+const FRAGMENT = /* @__PURE__ */ Symbol(`Fragment` );
+const TELEPORT = /* @__PURE__ */ Symbol(`Teleport` );
+const SUSPENSE = /* @__PURE__ */ Symbol(`Suspense` );
+const KEEP_ALIVE = /* @__PURE__ */ Symbol(`KeepAlive` );
+const BASE_TRANSITION = /* @__PURE__ */ Symbol(
+  `BaseTransition`
+);
+const OPEN_BLOCK = /* @__PURE__ */ Symbol(`openBlock` );[1;1H[?25h[?4m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[24;1H[?2004l[>4;m[?1004l[?2004l[?1l>[?1049l[>4;mVim: Error reading input, exiting...
 Vim: Finished.
 [24;1H[23;2t[23;1t
 
-Could not open index.js in the editor.
+Could not open compiler-core.cjs.js in the editor.
 The editor process exited with an error: (code 1).
 
-09:45:07 [vite] hmr update /src/views/TaskArchived.vue
-09:56:33 [vite] hmr update /src/views/TaskPending.vue
-09:58:25 [vite] hmr update /src/views/TaskCompleted.vue
-10:02:57 [vite] hmr update /src/views/TaskArchived.vue
-10:03:14 [vite] hmr update /src/views/TaskQuery.vue
-11:38:06 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-11:38:19 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-11:38:34 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-11:54:03 [vite] hmr update /src/views/TaskQuery.vue
-11:55:02 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-11:55:07 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-11:55:16 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-11:55:22 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-11:55:26 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-11:55:30 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:01:49 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-12:01:53 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-12:02:00 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:08:12 [vite] hmr update /src/views/TaskPending.vue
-12:08:17 [vite] hmr update /src/views/TaskArchived.vue
-12:08:23 [vite] hmr update /src/views/TaskQuery.vue
-12:08:44 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-12:09:02 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-12:09:14 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:11:02 [vite] hmr update /src/views/TaskQuery.vue
-12:11:32 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:13:05 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:13:19 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-12:13:28 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-12:13:46 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-12:15:35 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:15:41 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-12:15:45 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-12:15:53 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-12:17:54 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-12:18:01 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-12:18:09 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-12:18:16 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-12:20:40 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-12:22:48 [vite] hmr update /src/views/Login.vue
-12:22:52 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-12:23:01 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-12:23:20 [vite] hmr update /src/views/Login.vue?vue&type=style&index=0&scoped=08aaad4e&lang.css
-12:28:31 [vite] hmr update /src/views/SystemUser.vue
-12:29:07 [vite] hmr update /src/views/SystemUser.vue, /src/views/SystemOrg.vue, /src/views/SystemRole.vue
-12:29:10 [vite] hmr update /src/views/SystemUser.vue
-12:29:17 [vite] hmr update /src/views/SystemUser.vue
-13:29:19 [vite] hmr update /src/components/FlowChart.vue
-13:29:47 [vite] hmr update /src/components/FlowChart.vue
-14:28:44 [vite] hmr update /src/components/FlowChart.vue
-14:54:47 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-14:54:55 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-14:55:13 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-14:55:13 [vite] Internal server error: /Users/bryant/workbench/gfms/frontend/src/views/TaskQuery.vue:182:1: Unexpected }
+[?1049h[>4;2m[?1h=[?2004h[?1004h[1;24r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?2004l[>4;m[?2004h[>4;2m[?25l[24;1H<rontend/node_modules/@vue/compiler-core/dist/compiler-core.cjs.js"[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m<odules/@vue/compiler-core/dist/compiler-core.cjs.js" 6888L, 205260B[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m]11;?]10;?[1;1H/**
+* @vue/compiler-core v3.5.27
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var shared = require('@vue/shared');
+var decode = require('entities/decode');
+var parser = require('@babel/parser');
+var estreeWalker = require('estree-walker');
+var sourceMapJs = require('source-map-js');
+
+const FRAGMENT = /* @__PURE__ */ Symbol(`Fragment` );
+const TELEPORT = /* @__PURE__ */ Symbol(`Teleport` );
+const SUSPENSE = /* @__PURE__ */ Symbol(`Suspense` );
+const KEEP_ALIVE = /* @__PURE__ */ Symbol(`KeepAlive` );
+const BASE_TRANSITION = /* @__PURE__ */ Symbol(
+  `BaseTransition`
+);
+const OPEN_BLOCK = /* @__PURE__ */ Symbol(`openBlock` );[1;1H[?25h[?4m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[?2004l[>4;m[?2004h[>4;2m[24;1H[?2004l[>4;m[?1004l[?2004l[?1l>[?1049l[>4;mVim: Error reading input, exiting...
+Vim: Finished.
+[24;1H[23;2t[23;1t
+
+Could not open compiler-core.cjs.js in the editor.
+The editor process exited with an error: (code 1).
+
+23:20:05 [vite] hmr update /src/views/Dashboard.vue
+23:21:15 [vite] hmr update /src/views/Dashboard.vue
+23:22:21 [vite] hmr update /src/views/Dashboard.vue
+23:22:51 [vite] hmr update /src/views/Dashboard.vue
+23:22:51 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
   Plugin: vite:vue
-  File: /Users/bryant/workbench/gfms/frontend/src/views/TaskQuery.vue:672:1
-  671|  }
-  672|  
-  673|  .modern-table {
-     |  ^
-  674|    border-radius: 12px;
-  675|    overflow: hidden;
-      at Input.error (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/input.js:135:16)
-      at Parser.unexpectedClose (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:587:22)
-      at Parser.end (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:330:12)
-      at Parser.parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parser.js:456:16)
-      at parse (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/parse.js:11:12)
-      at new LazyResult (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/lazy-result.js:165:16)
-      at Processor.process (/Users/bryant/workbench/gfms/frontend/node_modules/postcss/lib/processor.js:53:14)
-      at doCompileStyle (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19542:36)
-      at Object.compileStyleAsync (/Users/bryant/workbench/gfms/frontend/node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js:19462:10)
-      at transformStyle (file:///Users/bryant/workbench/gfms/frontend/node_modules/@vitejs/plugin-vue/dist/index.mjs:2691:41)
-14:58:24 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-15:00:12 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-15:00:16 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-15:00:20 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-15:00:30 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-15:00:38 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-16:07:50 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-16:07:55 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-16:30:44 [vite] hmr update /src/views/WorkflowManagement.vue?vue&type=style&index=0&scoped=0b95a2e5&lang.css
-16:30:49 [vite] hmr update /src/views/WorkflowManagement.vue?vue&type=style&index=0&scoped=0b95a2e5&lang.css
-16:30:58 [vite] hmr update /src/views/WorkflowInstances.vue?vue&type=style&index=0&scoped=84ac7f90&lang.css
-16:31:15 [vite] hmr update /src/views/WorkflowVariables.vue?vue&type=style&index=0&scoped=e2dbeba7&lang.css
-16:32:46 [vite] hmr update /src/views/SystemUser.vue?vue&type=style&index=0&scoped=61f5ef47&lang.css
-16:33:20 [vite] hmr update /src/views/SystemRole.vue?vue&type=style&index=0&scoped=14e75c07&lang.css
-16:33:41 [vite] hmr update /src/views/SystemOrg.vue?vue&type=style&index=0&scoped=8b465f3e&lang.css
-16:34:10 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-16:34:24 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-16:34:54 [vite] hmr update /src/views/WorkflowInstances.vue?vue&type=style&index=0&scoped=84ac7f90&lang.css
-16:35:15 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-16:36:17 [vite] hmr update /src/views/SystemUser.vue?vue&type=style&index=0&scoped=61f5ef47&lang.css
-16:36:30 [vite] hmr update /src/views/SystemRole.vue?vue&type=style&index=0&scoped=14e75c07&lang.css
-16:36:42 [vite] hmr update /src/views/SystemOrg.vue?vue&type=style&index=0&scoped=8b465f3e&lang.css
-16:36:51 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-16:36:55 [vite] hmr update /src/views/TaskQuery.vue?vue&type=style&index=0&scoped=a8b33396&lang.css
-16:36:59 [vite] hmr update /src/views/WorkflowInstances.vue?vue&type=style&index=0&scoped=84ac7f90&lang.css
-16:37:03 [vite] hmr update /src/views/WorkflowInstances.vue?vue&type=style&index=0&scoped=84ac7f90&lang.css
-16:37:07 [vite] hmr update /src/views/WorkflowManagement.vue?vue&type=style&index=0&scoped=0b95a2e5&lang.css
-16:37:12 [vite] hmr update /src/views/WorkflowManagement.vue?vue&type=style&index=0&scoped=0b95a2e5&lang.css
-16:37:17 [vite] hmr update /src/views/WorkflowVariables.vue?vue&type=style&index=0&scoped=e2dbeba7&lang.css
-16:37:22 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-16:37:27 [vite] hmr update /src/views/TaskArchived.vue?vue&type=style&index=0&scoped=e653a872&lang.css
-16:37:36 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-16:38:02 [vite] hmr update /src/views/TaskPending.vue?vue&type=style&index=0&scoped=59e690ec&lang.css
-16:47:53 [vite] hmr update /src/App.vue?vue&type=style&index=0&lang.css
-16:49:44 [vite] page reload src/main.js
-23:57:41 [vite] hmr update /src/styles/table-styles.css
-00:03:53 [vite] hmr update /src/styles/table-styles.css
-00:05:52 [vite] hmr update /src/views/TaskPending.vue
-00:05:57 [vite] hmr update /src/views/TaskArchived.vue
-00:06:06 [vite] hmr update /src/views/TaskCompleted.vue
-00:06:13 [vite] hmr update /src/styles/table-styles.css
-14:20:47 [vite] page reload src/router/index.js
-14:21:29 [vite] hmr update /src/views/Layout.vue
-14:21:37 [vite] hmr update /src/views/Layout.vue
-14:21:42 [vite] hmr update /src/views/Layout.vue
-14:21:50 [vite] hmr update /src/views/Layout.vue
-14:32:46 [vite] hmr update /src/views/TaskCompleted.vue
-14:33:04 [vite] hmr update /src/views/TaskCompleted.vue
-14:33:20 [vite] hmr update /src/views/TaskCompleted.vue
-14:33:27 [vite] hmr update /src/views/TaskCompleted.vue
-17:01:08 [vite] hmr update /src/views/TaskCompleted.vue
-17:01:27 [vite] hmr update /src/views/TaskCompleted.vue?vue&type=style&index=0&scoped=611c6c8b&lang.css
-17:03:21 [vite] hmr update /src/views/TaskCompleted.vue
-17:03:26 [vite] hmr update /src/views/TaskCompleted.vue
-17:03:38 [vite] hmr update /src/views/TaskCompleted.vue
-17:10:12 [vite] hmr update /src/views/TaskCompleted.vue
-17:41:43 [vite] hmr update /src/views/TaskDetail.vue
-17:42:18 [vite] hmr update /src/views/TaskCompleted.vue
-17:43:12 [vite] hmr update /src/views/TaskDetail.vue
-17:47:38 [vite] hmr update /src/views/TaskPending.vue
-17:47:51 [vite] hmr update /src/views/TaskPending.vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:23:04 [vite] hmr update /src/views/Dashboard.vue
+23:23:04 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:23:28 [vite] hmr update /src/views/Dashboard.vue?vue&type=style&index=0&scoped=7f773d42&lang.css
+23:23:38 [vite] hmr update /src/views/Dashboard.vue?vue&type=style&index=0&scoped=7f773d42&lang.css
+23:23:46 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:23:58 [vite] hmr update /src/views/Dashboard.vue
+23:23:58 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:24:27 [vite] hmr update /src/views/Dashboard.vue
+23:24:27 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:32:57 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:33:01 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:36:08 [vite] Internal server error: [vue/compiler-sfc] Identifier 'ref' has already been declared. (7:9)
+
+/Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue
+162|  import { getDashboard } from '@/api/green_finance'
+163|  import { getScrollAnnouncements } from '@/api/announcement'
+164|  import { ref, computed, onMounted, onUnmounted } from 'vue'
+   |           ^
+165|  import { 
+166|    Money, 
+  Plugin: vite:vue
+  File: /Users/bryant/workbench/gfms/frontend/src/views/Dashboard.vue:7:9
+  5  |        <transition name="fade">
+  6  |          <div class="banner-item" :key="currentIndex">
+  7  |            <img :src="currentAnnouncement.cover_image" class="banner-image" alt="公告封面" />
+     |                              ^
+  8  |            <div class="banner-content">
+  9  |              <h3 class="banner-title">{{ currentAnnouncement.title }}</h3>
+      at constructor (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:365:19)
+      at Parser.raise (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:6599:19)
+      at ScopeHandler.checkRedeclarationInScope (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1619:19)
+      at ScopeHandler.declareName (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:1585:12)
+      at Parser.declareNameFromIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7567:16)
+      at Parser.checkIdentifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7563:12)
+      at Parser.checkLVal (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:7500:12)
+      at Parser.finishImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14266:10)
+      at Parser.parseImportSpecifier (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14419:17)
+      at Parser.parseNamedImportSpecifiers (/Users/bryant/workbench/gfms/frontend/node_modules/@babel/parser/lib/index.js:14398:36)
+23:52:30 [vite] hmr update /src/views/Dashboard.vue, /src/views/Dashboard.vue?vue&type=style&index=0&scoped=7f773d42&lang.css
+23:52:52 [vite] hmr update /src/views/Dashboard.vue
+23:53:05 [vite] hmr update /src/views/Dashboard.vue
+23:55:23 [vite] hmr update /src/views/Dashboard.vue
+23:56:53 [vite] hmr update /src/views/Dashboard.vue
+23:57:01 [vite] hmr update /src/views/Dashboard.vue?vue&type=style&index=0&scoped=7f773d42&lang.css

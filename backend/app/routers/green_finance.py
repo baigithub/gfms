@@ -1403,3 +1403,128 @@ async def mark_task_as_non_green(
     db.commit()
     
     return {"message": "任务已标记为非绿"}
+
+
+@router.get("/charts/loan-balance-trend")
+async def get_loan_balance_trend(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """获取最近12个月认定绿色贷款余额趋势"""
+    from sqlalchemy import extract, func as sql_func
+    
+    # 获取最近12个月的数据
+    result = db.query(
+        extract('year', GreenIdentification.completed_at).label('year'),
+        extract('month', GreenIdentification.completed_at).label('month'),
+        sql_func.sum(GreenIdentification.green_loan_balance).label('total_balance')
+    ).filter(
+        GreenIdentification.status == TaskStatus.ARCHIVED.value,
+        GreenIdentification.completed_at.isnot(None),
+        GreenIdentification.green_loan_balance.isnot(None)
+    ).group_by(
+        extract('year', GreenIdentification.completed_at),
+        extract('month', GreenIdentification.completed_at)
+    ).order_by(
+        extract('year', GreenIdentification.completed_at),
+        extract('month', GreenIdentification.completed_at)
+    ).limit(12).all()
+    
+    # 转换为前端需要的格式
+    months = []
+    balances = []
+    
+    for row in result:
+        year = int(row.year)
+        month = int(row.month)
+        months.append(f"{year}-{month:02d}")
+        balances.append(float(row.total_balance or 0))
+    
+    return {
+        "months": months,
+        "balances": balances
+    }
+
+
+@router.get("/charts/disbursement-trend")
+async def get_disbursement_trend(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """获取最近12个月放款金额趋势"""
+    from sqlalchemy import extract, func as sql_func
+    
+    # 获取最近12个月的数据
+    result = db.query(
+        extract('year', GreenIdentification.disbursement_date).label('year'),
+        extract('month', GreenIdentification.disbursement_date).label('month'),
+        sql_func.sum(GreenIdentification.loan_amount).label('total_amount')
+    ).filter(
+        GreenIdentification.disbursement_date.isnot(None),
+        GreenIdentification.loan_amount.isnot(None)
+    ).group_by(
+        extract('year', GreenIdentification.disbursement_date),
+        extract('month', GreenIdentification.disbursement_date)
+    ).order_by(
+        extract('year', GreenIdentification.disbursement_date),
+        extract('month', GreenIdentification.disbursement_date)
+    ).limit(12).all()
+    
+    # 转换为前端需要的格式
+    months = []
+    amounts = []
+    
+    for row in result:
+        year = int(row.year)
+        month = int(row.month)
+        months.append(f"{year}-{month:02d}")
+        amounts.append(float(row.total_amount or 0))
+    
+    return {
+        "months": months,
+        "amounts": amounts
+    }
+
+
+@router.get("/charts/green-category-distribution")
+async def get_green_category_distribution(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """获取截止当前时点绿色大类占比"""
+    from sqlalchemy import func as sql_func
+    
+    # 按绿色大类统计当前余额
+    result = db.query(
+        GreenIdentification.project_category_large.label('category'),
+        sql_func.sum(GreenIdentification.green_loan_balance).label('total_balance')
+    ).filter(
+        GreenIdentification.status == TaskStatus.ARCHIVED.value,
+        GreenIdentification.green_loan_balance.isnot(None),
+        GreenIdentification.project_category_large.isnot(None)
+    ).group_by(
+        GreenIdentification.project_category_large
+    ).all()
+    
+    # 转换为前端需要的格式
+    categories = []
+    balances = []
+    total = 0
+    
+    for row in result:
+        if row.category:
+            balance = float(row.total_balance or 0)
+            categories.append(row.category)
+            balances.append(balance)
+            total += balance
+    
+    # 计算百分比
+    percentages = [(balance / total * 100) if total > 0 else 0 for balance in balances]
+    
+    return {
+        "categories": categories,
+        "balances": balances,
+        "percentages": percentages
+    }
+    
+    return {"message": "任务已标记为非绿"}

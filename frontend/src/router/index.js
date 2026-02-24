@@ -78,6 +78,12 @@ const routes = [
             meta: { title: '用户管理', permission: 'system-user' }
           },
           {
+            path: 'announcement',
+            name: 'SystemAnnouncement',
+            component: () => import('@/views/Announcement.vue'),
+            meta: { title: '公告管理', permission: 'system-announcement' }
+          },
+          {
             path: 'role',
             name: 'SystemRole',
             component: () => import('@/views/SystemRole.vue'),

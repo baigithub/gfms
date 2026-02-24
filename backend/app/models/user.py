@@ -15,6 +15,8 @@ class User(Base):
     employee_id = Column(String(20), unique=True, index=True)
     email = Column(String(100), unique=True, index=True)
     phone = Column(String(20))
+    wechat_openid = Column(String(255))
+    wechat_unionid = Column(String(255))
     avatar = Column(String(255))
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
