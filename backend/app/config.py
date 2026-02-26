@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD_LOCAL: Optional[str] = None
     
     # CORS
-    CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000"]
+    CORS_ORIGINS: list = ["http://localhost:5173", "http://localhost:3000", "http://localhost:8082"]
     
     @property
     def DATABASE_URL(self) -> str:

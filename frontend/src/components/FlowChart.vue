@@ -127,8 +127,33 @@ const activeProcessDefinition = ref(null) // 当前启用的流程定义
 
 // 根据流程定义ID或工作流历史生成流程步骤定义
 const getFlowStepDefinitions = () => {
-  // 如果有工作流历史且已绑定流程版本，从历史中提取节点
-  if (props.workflowHistory && props.workflowHistory.length > 0 && props.processDefinitionId) {
+  // 优先使用流程定义中的节点信息
+  if (activeProcessDefinition.value && activeProcessDefinition.value.nodes && activeProcessDefinition.value.nodes.length > 0) {
+    const flowStepDefinitions = [
+      { title: '开始', description: '客户经理发起认定', code: 'start' }
+    ]
+    
+    // 按照流程定义中的顺序添加任务节点
+    activeProcessDefinition.value.nodes.forEach(node => {
+      if (node.type === 'task') {
+        flowStepDefinitions.push({
+          title: node.name,
+          description: node.name,
+          code: node.task_key || node.name
+        })
+      }
+    })
+    
+    flowStepDefinitions.push({
+      title: '结束',
+      description: '流程完成',
+      code: 'end'
+    })
+    
+    return flowStepDefinitions
+  }
+  // 如果没有流程定义但有工作流历史，从历史中提取节点
+  else if (props.workflowHistory && props.workflowHistory.length > 0 && props.processDefinitionId) {
     const taskKeys = new Set()
     const taskNames = {}
     
@@ -204,6 +229,17 @@ const getFlowStepDefinitions = () => {
   }
 }
 
+// 将节点名称映射到 task_key（与后端保持一致）
+const mapNodeNameToTaskKey = (nodeName) => {
+  if (!nodeName) return ''
+  if (nodeName.includes('客户经理')) return 'manager_identification'
+  if (nodeName.includes('二级分行')) return 'branch_review'
+  if (nodeName.includes('一级分行') && nodeName.includes('复核')) return 'final_review'
+  if (nodeName.includes('一级分行')) return 'first_approval'
+  if (nodeName.includes('复核')) return 'final_review'
+  return nodeName.toLowerCase().replace(/\s+/g, '_')
+}
+
 // 获取当前启用的流程定义
 const fetchActiveProcessDefinition = async () => {
   try {
@@ -242,12 +278,14 @@ const fetchActiveProcessDefinition = async () => {
           const task = userTasks[i]
           const taskName = task.getAttribute('name') || task.getAttribute('id')
           const taskId = task.getAttribute('id')
-          console.log(`节点${i}: id=${taskId}, name=${taskName}`)
+          // 使用与后端一致的映射函数
+          const taskKey = mapNodeNameToTaskKey(taskName)
+          console.log(`节点${i}: id=${taskId}, name=${taskName}, task_key=${taskKey}`)
           nodes.push({
             id: taskId,
             name: taskName,
             type: 'task',
-            task_key: taskId
+            task_key: taskKey
           })
         }
         
