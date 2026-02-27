@@ -833,11 +833,6 @@ class WorkflowEngine:
             workflow_instance_id=workflow.id,
             identification_id=task.identification_id
         )
-        # 将原本的已完成任务标记为已撤回，这样就不会出现在已办列表中
-        task.status = "已撤回"
-        task.approval_result = "撤回"
-        task.reason = "用户撤回操作"
-        task.completed_at = datetime.now()
         
         db.add(new_task)
         

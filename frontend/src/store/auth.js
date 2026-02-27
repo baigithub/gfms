@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-const INACTIVITY_TIMEOUT = 10 * 60 * 1000 // 10分钟（毫秒）
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000 // 30分钟（毫秒）
 let inactivityTimer = null
 
 export const useAuthStore = defineStore('auth', () => {
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
       clearTimeout(inactivityTimer)
     }
     inactivityTimer = setTimeout(() => {
-      // 10分钟无操作，自动登出
+      // 30分钟无操作，自动登出
       logout()
     }, INACTIVITY_TIMEOUT)
   }
