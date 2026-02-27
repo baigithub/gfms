@@ -35,7 +35,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"],  # 禁用 OPTIONS 和 TRACE
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],  # 禁用 TRACE
     allow_headers=["*"],
 )
 
