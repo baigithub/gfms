@@ -408,6 +408,31 @@ async def complete_task(
     if not task:
         raise HTTPException(status_code=404, detail="任务不存在或无权操作")
     
+    # 获取对应的 identification
+    identification = db.query(GreenIdentification).filter(
+        GreenIdentification.id == task.identification_id
+    ).first()
+    
+    if identification:
+        # 更新 identification 的分类信息
+        if task_data.project_category_large:
+            identification.project_category_large = task_data.project_category_large
+        if task_data.project_category_medium:
+            identification.project_category_medium = task_data.project_category_medium
+        if task_data.project_category_small:
+            identification.project_category_small = task_data.project_category_small
+        
+        # 保存当前任务的绿色分类信息到任务记录
+        task.project_category_large = identification.project_category_large
+        task.project_category_medium = identification.project_category_medium
+        task.project_category_small = identification.project_category_small
+        # 获取并保存格式化的分类名称
+        from app.services.workflow import get_formatted_category
+        formatted_category = get_formatted_category(db, identification)
+        task.formatted_category = formatted_category
+        
+        db.commit()
+    
     WorkflowEngine.complete_task(db, task, task_data.approval_result, task_data.comment, task_data.reason)
     
     return {"message": "任务已完成"}

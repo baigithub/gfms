@@ -106,6 +106,9 @@ class WorkflowTaskCreate(BaseModel):
     approval_result: str
     comment: Optional[str] = None
     reason: Optional[str] = None
+    project_category_large: Optional[str] = None
+    project_category_medium: Optional[str] = None
+    project_category_small: Optional[str] = None
 
 
 class WorkflowTask(WorkflowTaskBase):
